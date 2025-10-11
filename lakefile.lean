@@ -12,9 +12,3 @@ require SafeVerify from git
 
 @[default_target]
 lean_lib VerifiedAgora where
-
--- @[default_target]
--- lean_lib TrainingData where
-
--- require lean4checker from git
---   "https://github.com/leanprover/lean4checker.git" @ "v4.20.1"
