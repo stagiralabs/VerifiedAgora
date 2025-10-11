@@ -8,7 +8,7 @@ package VerifiedAgora {
 
 
 require SafeVerify from git
-"https://github.com/GasStationManager/SafeVerify.git" @ "main"
+"https://github.com/riyazahuja/SafeVerify.git" @ "main"
 
 @[default_target]
 lean_lib VerifiedAgora where

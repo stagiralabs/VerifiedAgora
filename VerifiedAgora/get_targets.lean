@@ -376,7 +376,7 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
     match submission.toNat? with
     | some n =>
       -- buffer mode
-      let payload_raw : ByteArray ← (← getStdin).read n
+      let payload_raw : ByteArray ← (← getStdin).read n.toUSize
       let payload_str? := String.fromUTF8? payload_raw
       match payload_str? with
       | none =>
