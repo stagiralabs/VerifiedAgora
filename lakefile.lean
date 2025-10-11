@@ -12,3 +12,8 @@ require SafeVerify from git
 
 @[default_target]
 lean_lib VerifiedAgora where
+
+@[default_target]
+lean_exe get_targets where
+  root := `VerifiedAgora.get_targets
+  supportInterpreter := true
