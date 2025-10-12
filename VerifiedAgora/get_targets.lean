@@ -241,14 +241,16 @@ def onlyHuman (targets : List (CompilationStep × ConstantInfo)) : IO (List (Com
 
 
 unsafe def getTargets (submitted : String) (target? : Option String := none) (diff? : Bool := False): IO FileDescriptor := do
+  searchPathRef.set compile_time_search_path%
   let target := target?.getD submitted
-
   let target_steps := Lean.Elab.IO.processInput' target
   let targets_cs := target_steps.bind fun c => (MLList.ofList c.diff).map fun i => (c, i)
   let targets_flat ← (onlyHuman (← targets_cs.force))
-
   let submitted_flat : List (CompilationStep × ConstantInfo) ← if target?.isNone then pure targets_flat else do
     let submitted_steps := Lean.Elab.IO.processInput' submitted
+    let temp ← submitted_steps.force
+    IO.println s!"Processed {temp.length} compilation steps in submission"
+
     let submitted_cs := submitted_steps.bind fun c => (MLList.ofList c.diff).map fun i => (c, i)
     onlyHuman (← submitted_cs.force)
 
@@ -383,23 +385,29 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
         IO.eprintln "Error: could not decode stdin as UTF-8"
       | some payload => do
         let descriptor ← getTargets payload targetContent? diff?
-
+        let json := ToJson.toJson descriptor.toArray
         if save?.isSome then
-          let json := Json.arr <| descriptor.toArray.map ToJson.toJson
           let _ ← IO.FS.writeFile save?.get! (json.pretty)
           IO.println s!"Wrote file descriptor to {save?.get!}"
+        else
+          IO.println "<DESCRIPTOR>"
+          IO.println json.pretty
+          IO.println "</DESCRIPTOR>"
 
     | none =>
       -- file mode
       let contents ← getFileOrModuleContents submission
       let descriptor ← getTargets contents targetContent? diff?
-
+      let json := ToJson.toJson descriptor
       if save?.isSome then
-          let json := Json.arr <| descriptor.toArray.map ToJson.toJson
           let _ ← IO.FS.writeFile save?.get! (json.pretty)
           IO.println s!"Wrote file descriptor to {save?.get!}"
+      else
+        IO.println "<DESCRIPTOR>"
+        IO.println json.pretty
+        IO.println "</DESCRIPTOR>"
 
-      -- IO.println "Finished with no errors."
+      IO.println "Finished with no errors."
     return 0
   catch e =>
     IO.eprintln s!"Error: {e}"
