@@ -1,30 +1,10 @@
 import Lean.Elab.Frontend
 import Lean.Util.CollectAxioms
 import VerifiedAgora.Frontend
+import VerifiedAgora.Environment
+
 
 open Lean Elab
-
-def init : IO Unit := do
-  initSearchPath (← getLibDir (← findSysroot))
-  unsafe Lean.enableInitializersExecution
-
-
-unsafe def makeEnv (input : String) (curr : IO Environment := mkEmptyEnvironment) : IO (Environment × String) := do
-  let ⟨imports, pos, msgs⟩ ← parseImports input
-  if !msgs.toList.isEmpty then
-    throw <| IO.userError s!"failed to parse imports"
-
-  let pos := FileMap.ofString input |>.ofPosition pos
-  let rest := input.extract pos input.endPos
-
-  let old_env ← curr
-  if (old_env.imports.map (fun x => x.module.toString) |>.insertionSort) = (imports.map (fun x => x.module.toString) |>.insertionSort) then
-    return (old_env, rest)
-  old_env.freeRegions
-
-  let env ← importModules imports Options.empty (leakEnv := false) (loadExts := true)
-
-  return (env, rest)
 
 def new_constants (old : Environment) (new : Environment) : List ConstantInfo :=
   new.constants.map₂.toList.filterMap
@@ -39,10 +19,10 @@ def AllowedAxioms := [`propext, `Quot.sound, `Classical.choice]
 def ensureClean (old : Environment) (new : Environment) : IO Unit := do
   let cis := new_constants old new
   for ci in cis do
-    IO.println s!"New constant: {ci.name}"
+    -- IO.println s!"New constant: {ci.name}"
     let axioms := (← collectAxiomsButBetter new ci.name).toList
     for ax in axioms do
-      IO.println s!"{ci.name} uses axiom {ax}"
+      -- IO.println s!"{ci.name} uses axiom {ax}"
       if !AllowedAxioms.contains ax then
         throw <| IO.userError s!"environment is not clean, new axiom {ax} used in {ci.name}"
 
@@ -61,6 +41,10 @@ def check_input (env : Environment) (input : String) : IO Unit := do
   -- let ⟨new, msgs, trees⟩ ← IO.processInput input (some env) Options.empty
 
   let ⟨new, msgs⟩ ← process input env Options.empty
+
+  for msg in msgs.toList do
+    if msg.severity == MessageSeverity.error then
+      throw <| IO.userError s!"failed to process input: {← msg.toString}"
 
   ensureClean env new
   -- let cis := new_constants env new
@@ -83,8 +67,8 @@ def test_input := "import Lean
 
 def test := (1 : Nat)
 
-def test2 := sorry
-axiom test_ax : False
+def test2 : Nat := 1
+-- axiom test_ax : False
 "
 
 
