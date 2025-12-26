@@ -240,7 +240,7 @@ def onlyHuman (targets : List (CompilationStep × ConstantInfo)) : IO (List (Com
   return targets_new.toList
 
 
-unsafe def getTargets (submitted : String) (target? : Option String := none) (diff? : Bool := False): IO FileDescriptor := do
+unsafe def getTargets' (submitted : String) (target? : Option String := none) (diff? : Bool := False): IO FileDescriptor := do
   searchPathRef.set compile_time_search_path%
   let target := target?.getD submitted
   let target_steps := Lean.Elab.IO.processInput' target
@@ -341,10 +341,6 @@ unsafe def getTargets (submitted : String) (target? : Option String := none) (di
     throw <| IO.userError s!"Could not get final environment from submission/target"
 
 
-
-
-
-
 unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   let submission := args.flag! "submission" |>.as! String
   let target := args.flag! "target" |>.as! String
@@ -384,7 +380,7 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
       | none =>
         IO.eprintln "Error: could not decode stdin as UTF-8"
       | some payload => do
-        let descriptor ← getTargets payload targetContent? diff?
+        let descriptor ← getTargets' payload targetContent? diff?
         let json := ToJson.toJson descriptor.toArray
         if save?.isSome then
           let _ ← IO.FS.writeFile save?.get! (json.pretty)
@@ -397,7 +393,7 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
     | none =>
       -- file mode
       let contents ← getFileOrModuleContents submission
-      let descriptor ← getTargets contents targetContent? diff?
+      let descriptor ← getTargets' contents targetContent? diff?
       let json := ToJson.toJson descriptor
       if save?.isSome then
           let _ ← IO.FS.writeFile save?.get! (json.pretty)
@@ -435,7 +431,7 @@ additional flags:
 
 -/
 
-unsafe def get_targets : Cmd := `[Cli|
+unsafe def getTargets : Cmd := `[Cli|
   get_targets VIA getTargetsCLI; ["0.0.1"]
 "Get targets from a string."
 
@@ -446,12 +442,6 @@ unsafe def get_targets : Cmd := `[Cli|
     save : String; "If provided, save the file descriptor to this file as json to specified path. Default is no save."
     diff : String; "If provided (and target file is specified), output the diff of the file descriptor instead of the full thing. Default is false."
 
-  -- ARGS:
-    -- n : Nat; "Bytes to read from stdin"
-    -- replace_proof : String; "What to replace the proof with. Default is none"
-  --   pythonCommand : String; "Path to python executable."
-  --   rag_id : String; "ID for the rag directory, used to identify the source of the prompts in the database."
-  --   k : Nat; "Number of RAG results to use for each prompt."
 
   EXTENSIONS:
     defaultValues! #[("target", ""), ("save", ""), ("diff", "false")]
@@ -459,4 +449,4 @@ unsafe def get_targets : Cmd := `[Cli|
 
 
 unsafe def main (args : List String) : IO UInt32 :=
-  get_targets.validate args
+  getTargets.validate args

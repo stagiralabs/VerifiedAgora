@@ -15,5 +15,10 @@ lean_lib VerifiedAgora where
 
 @[default_target]
 lean_exe get_targets where
-  root := `VerifiedAgora.get_targets
+  root := `VerifiedAgora.getTargets
+  supportInterpreter := true
+
+@[default_target]
+lean_exe get_all_targets where
+  root := `VerifiedAgora.allTargets
   supportInterpreter := true
