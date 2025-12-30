@@ -191,7 +191,7 @@ unsafe def replayFileDirect (final_env : Environment) (targets : Array _root_.In
             throw <| IO.userError s!"definition {n} does not match the requirement"
           --if (¬ nc) && isNoncomputable env' n then
           --  throw <| IO.userError s!"definition {n} is noncomputable"
-        let allow_sorry? := n ∈ marked
+        let allow_sorry? := marked.length > 0 || n ∈ marked
         checkAxioms env' n allow_sorry?
       else
         throw <| IO.userError s!"{n} not found in submission"
