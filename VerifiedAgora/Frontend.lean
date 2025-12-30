@@ -190,14 +190,28 @@ def processInput (input : String) (env? : Option Environment := none)
 
 open System
 
-/-- Parallel to compile_time_search_path% -/
+-- Parallel to compile_time_search_path%
 -- elab "compile_time_src_search_path%" : term =>
 --   return toExpr (← initSrcSearchPath)
 
-def findLean (mod : Name) : IO FilePath := do
-  initSearchPath (← getLibDir (← findSysroot))
-  let srcSearchPath ← getSrcSearchPath
+-- def findLean (mod : Name) : IO FilePath := do
+--   initSearchPath (← getLibDir (← findSysroot))
+--   let srcSearchPath ← getSrcSearchPath
 
+--   if let some fname ← srcSearchPath.findModuleWithExt "lean" mod then
+--     return fname
+--   else
+--     let fname := FilePath.mk ((← findOLean mod).toString.replace ".lake/build/lib/" "") |>.withExtension "lean"
+--     if !(← fname.pathExists) then
+--       throw <| IO.userError s!"Path to {mod} not found"
+--     return fname
+
+/-- Parallel to compile_time_search_path% -/
+elab "compile_time_src_search_path%" : term =>
+  return toExpr (← initSrcSearchPath)
+
+def findLean (mod : Name) : IO FilePath := do
+  let srcSearchPath : SearchPath := compile_time_src_search_path%
   if let some fname ← srcSearchPath.findModuleWithExt "lean" mod then
     return fname
   else
@@ -205,6 +219,7 @@ def findLean (mod : Name) : IO FilePath := do
     if !(← fname.pathExists) then
       throw <| IO.userError s!"Path to {mod} not found"
     return fname
+
 
 /-- Like `findLean` but produces the version of the file in `Examples/WithImports`. This only supports Lean versions at least
     as recent as Lean v4.3. -/
