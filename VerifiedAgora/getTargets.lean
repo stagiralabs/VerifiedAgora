@@ -2,149 +2,8 @@ import Cli.Extensions
 import VerifiedAgora.tagger
 import VerifiedAgora.Frontend
 import VerifiedAgora.TacticInvocation
-open Lean Meta Core
-
-/-
-  From Batteries.Lean.TagAttribute
--/
-
-/-- Get the list of declarations tagged with the tag attribute `attr`. -/
-def Lean.TagAttribute.getDecls (attr : TagAttribute) (env : Environment) : Array Name :=
-  core <| attr.ext.toEnvExtension.getState env
-where
-  /-- Implementation of `TagAttribute.getDecls`. -/
-  core (st : PersistentEnvExtensionState Name NameSet) : Array Name := Id.run do
-    let mut decls := st.state.toArray
-    for ds in st.importedEntries do
-      decls := decls ++ ds
-    decls
-
-
-
-
-def Lean.ConstantInfo.kind : ConstantInfo → String
-  | .axiomInfo  _ => "axiom"
-  | .defnInfo   _ => "def"
-  | .thmInfo    _ => "theorem"
-  | .opaqueInfo _ => "opaque"
-  | .quotInfo   _ => "quot"
-  | .inductInfo _ => "inductive"
-  | .ctorInfo   _ => "constructor"
-  | .recInfo    _ => "recursor"
-
-def AllowedAxioms := [`propext, `Quot.sound, `Classical.choice]
-def TargetsAllowedAxioms := AllowedAxioms ++ [`sorryAx]
-
-def checkAxioms (env: Environment) (n: Name) (allow_sorry? : Bool := false): IO Unit:= do
-  let (_,s):=(CollectAxioms.collect n).run env |>.run {}
-  for a in s.axioms do
-    let ax := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
-    if a ∉ ax then
-      throw <| IO.userError s!"{a} is not in the allowed set of standard axioms"
-
-structure Info where
-  name: Name
-  constInfo: ConstantInfo
-  axioms: Array Name
-  --nonComputable: Bool
-  deriving Inhabited
-
-/-
-From Lean.Environment
-Check if two theorems have the same type and name
--/
-def equivThm (cinfo₁ cinfo₂ : ConstantInfo) : Bool := Id.run do
-  let .thmInfo tval₁ := cinfo₁ | false
-  let .thmInfo tval₂ := cinfo₂ | false
-  return tval₁.name == tval₂.name
-    && tval₁.type == tval₂.type
-    && tval₁.levelParams == tval₂.levelParams
-    && tval₁.all == tval₂.all
-
-/-
-Check if two definitions have the same type and name.
-If checkVal is true, then also check their values are the same
--/
-def equivDefn (ctarget cnew : ConstantInfo)(checkVal:Bool:=false) : Bool := Id.run do
-  let .defnInfo tval₁ := ctarget | false
-  let .defnInfo tval₂ := cnew | false
-
-  return tval₁.name == tval₂.name
-    && tval₁.type == tval₂.type
-    && tval₁.levelParams == tval₂.levelParams
-    && tval₁.all == tval₂.all
-    && tval₁.safety == tval₂.safety
-    && (if checkVal then tval₁.value==tval₂.value else true)
-
+import VerifiedAgora.Utils
 open Lean Core Elab IO Meta Term Command Tactic Cli
-
-
-
--- structure ExampleData extends TheoremData where
---   improved : String := ""
---   deriving ToJson, FromJson
-
-
--- def groupByTagName (targetData : List (CompilationStep × ConstantInfo × Name × Version))
---   : IO (Array (Name × Array (CompilationStep × ConstantInfo × Version))) := do
-
---   let mut grouped : Array (Name × Array (CompilationStep × ConstantInfo × Version)) := #[]
-
---   for (cmd, ci, tagName, version) in targetData do
---     let existingGroup? := grouped.findIdx? (fun (name, _) => name == tagName)
---     match existingGroup? with
---     | some idx =>
---       let (name, existing) := grouped[idx]!
-
---       -- push only if a singleton containing unoptimized or optimized.
---       let version_subarray := existing.filterMap (fun (_, _, v) => if v == Version.unoptimized || v == Version.optimized then some v else none)
---       if version_subarray.size == 1 && (
---           (version == .unoptimized && version_subarray[0]! == .optimized)
---         || (version == .optimized && version_subarray[0]! == .unoptimized)
---         ) then
---         grouped := grouped.set! idx (name, existing.push (cmd, ci, version))
---       else
---         IO.println s!"Unexpected versioning in {tagName}: {version} with existing versions: {version_subarray}, taking only first"
-
---     | none =>
---       grouped := grouped.push (tagName, #[(cmd, ci, version)])
---   return grouped
-
-
-
-structure DeclarationDescriptor where
-  cs : CompilationStep
-  ci : ConstantInfo
-  msgs : List (MessageSeverity × String)
-  target? : Bool
-
-
-instance: BEq DeclarationDescriptor where
-  beq d1 d2 :=
-    d1.ci.name == d2.ci.name &&
-    d1.ci.type == d2.ci.type &&
-    d1.ci.kind == d2.ci.kind &&
-    d1.target? == d2.target? &&
-    d1.msgs == d2.msgs &&
-    d1.cs.src == d2.cs.src
-
-instance : ToJson DeclarationDescriptor where
-  toJson fd :=
-
-  Json.mkObj [
-    ("name", Json.str fd.ci.name.toString),
-    ("contents", Json.str fd.cs.src.toString),
-    ("isTarget", Json.bool fd.target?),
-    ("context", Json.str ((⟨fd.cs.src.str, 0, fd.cs.src.startPos⟩ : Substring).toString)),
-    ("kind", Json.str (fd.ci.kind)),
-    ("msgs", Json.arr <| fd.msgs.toArray.map (fun (sev, data) => Json.mkObj [("severity", (ToJson.toJson sev)), ("data", Json.str data)]) )
-  ]
-
-instance : ToString DeclarationDescriptor where
-  toString fd := ToJson.toJson fd |>.pretty
-
-abbrev FileDescriptor := List DeclarationDescriptor
-
 
 
 
@@ -240,8 +99,7 @@ def onlyHuman (targets : List (CompilationStep × ConstantInfo)) : IO (List (Com
   return targets_new.toList
 
 
-unsafe def getTargets' (submitted : String) (target? : Option String := none) (diff? : Bool := False): IO FileDescriptor := do
-  searchPathRef.set compile_time_search_path%
+unsafe def getTargets' (submitted : String) (target? : Option String := none) (diff? : Bool := False) (source_file : Option System.FilePath := none): IO FileDescriptor := do
   let target := target?.getD submitted
   let target_steps := Lean.Elab.IO.processInput' target
   let targets_cs := target_steps.bind fun c => (MLList.ofList c.diff).map fun i => (c, i)
@@ -319,10 +177,12 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
         let st ← m.data.toString
         msgs := msgs.push (m.severity, st)
       return  {
-        cs := cs,
         ci := ci,
-        msgs := msgs.toList,
-        target? := is_tagged
+        contents := cs.src,
+        context := (Substring.mk cs.src.str 0 cs.src.startPos),
+        msgs? := some msgs.toList,
+        target? := is_tagged,
+        sourceFile? := source_file
       }
 
     let target_final : List DeclarationDescriptor ← targetData.mapM toDeclDescriptor
@@ -338,10 +198,12 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
     -- throw <| IO.userError s!"safeVerify not yet implemented"
 
   | _ =>
-    throw <| IO.userError s!"Could not get final environment from submission/target"
+    throw <| IO.userError s!"Could not get final environment from submission/target."
 
 
 unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
+  searchPathRef.set compile_time_search_path%
+
   let submission := args.flag! "submission" |>.as! String
   let target := args.flag! "target" |>.as! String
 
@@ -353,23 +215,12 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   let diff := args.flag! "diff" |>.as! String
   let diff? := if diff != "true" then false else true
 
-
-  let getFileOrModuleContents (name : String) : IO String := do
-    --first attempt as module name
-    let modName := name.toName
-    try
-      let contents? ← moduleSource modName
-      return contents?
-    catch _ =>
-      try
-        -- attempt as file name
-        let contents? ← IO.FS.readFile name
-        return contents?
-      catch _ =>
-        throw <| IO.userError s!"Could not find module or file: {name}"
-
   try
     let targetContent? ← target?.mapM (fun t => getFileOrModuleContents t)
+
+    let (targetContent?, _, target_fp?) := match targetContent? with
+      | some (c, m, fp) => (some c, some m, some fp)
+      | none => (none, none, none)
 
     match submission.toNat? with
     | some n =>
@@ -380,7 +231,7 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
       | none =>
         IO.eprintln "Error: could not decode stdin as UTF-8"
       | some payload => do
-        let descriptor ← getTargets' payload targetContent? diff?
+        let descriptor ← getTargets' payload targetContent? diff? target_fp?
         let json := ToJson.toJson descriptor.toArray
         if save?.isSome then
           let _ ← IO.FS.writeFile save?.get! (json.pretty)
@@ -392,8 +243,8 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
 
     | none =>
       -- file mode
-      let contents ← getFileOrModuleContents submission
-      let descriptor ← getTargets' contents targetContent? diff?
+      let (contents,_, fp) ← getFileOrModuleContents submission
+      let descriptor ← getTargets' contents targetContent? diff? (some fp)
       let json := ToJson.toJson descriptor
       if save?.isSome then
           let _ ← IO.FS.writeFile save?.get! (json.pretty)
@@ -441,6 +292,7 @@ unsafe def getTargets : Cmd := `[Cli|
 
     save : String; "If provided, save the file descriptor to this file as json to specified path. Default is no save."
     diff : String; "If provided (and target file is specified), output the diff of the file descriptor instead of the full thing. Default is false."
+
 
 
   EXTENSIONS:
