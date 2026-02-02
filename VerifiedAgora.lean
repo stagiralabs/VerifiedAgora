@@ -1,2 +1,1 @@
-import VerifiedAgora.getTargets
 import VerifiedAgora.tagger
