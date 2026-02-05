@@ -162,7 +162,8 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
     IO.println "Checked no errors/warnings outside tagged items"
 
     -- all rules passed, now run safeVerify
-    let targetInfos ← replayFileDirect env_targ
+    -- Allow `sorryAx` for tagged declarations in the target environment.
+    let targetInfos ← replayFileDirect env_targ #[] (targetTargetDecls.toList)
     -- let task ← IO.asTask (replayFileDirect env_sub targetInfos)
     -- if let .error e:=task.get then
     --   IO.eprintln s!"found a problem in submission."
