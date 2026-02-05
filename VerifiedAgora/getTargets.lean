@@ -19,6 +19,16 @@ unsafe def replayFileDirect (final_env : Environment) (targets : Array _root_.In
   --env' ← setImportedEntries env' #[mod]
   --env' ← finalizePersistentExtensions env' #[mod] {}
   let ctx:={fileName:="", fileMap:=default}
+  let isHumanDecl : Name → IO Bool := fun name => do
+    let state : Core.State := {env := env'}
+    match (← CoreM.run (do
+      let hasDeclRange := (← Lean.findDeclarationRanges? name).isSome
+      let notProjFn := !(← Lean.isProjectionFn name)
+      return hasDeclRange && notProjFn
+    ) ctx state |>.toIO').toOption with
+    | some x => pure x.1
+    | none => pure false
+
   let mut ret:Array _root_.Info:= #[]
   for (n,ci) in env'.constants.map₂  do
     if ci.kind ∈ ["theorem", "def"] then
@@ -30,6 +40,7 @@ unsafe def replayFileDirect (final_env : Environment) (targets : Array _root_.In
         IO.println s!":= {ci.value!}"
       let (_,s):=(CollectAxioms.collect n).run env' |>.run {}
       IO.println s.axioms
+      IO.println s!"isTarget? : {marked.contains n}"
       --let nc:=isNoncomputable env' n
       --IO.println s!"noncomputable: {nc}"
       ret:=ret.push ⟨ n,ci,s.axioms⟩
@@ -52,7 +63,8 @@ unsafe def replayFileDirect (final_env : Environment) (targets : Array _root_.In
           --  throw <| IO.userError s!"definition {n} is noncomputable"
         -- let allow_sorry? := marked.length > 0 || n ∈ marked
         let allow_sorry? := n ∈ marked
-        checkAxioms env' n allow_sorry?
+        if (← isHumanDecl n) then
+          checkAxioms env' n allow_sorry?
       else
         throw <| IO.userError s!"{n} not found in submission"
   --env'.freeRegions
