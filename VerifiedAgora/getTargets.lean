@@ -32,41 +32,42 @@ unsafe def replayFileDirect (final_env : Environment) (targets : Array _root_.In
   let mut ret:Array _root_.Info:= #[]
   for (n,ci) in env'.constants.map₂  do
     if ci.kind ∈ ["theorem", "def"] then
-      IO.println "---"
-      IO.println ci.kind
-      IO.println n
-      IO.println <| ←  Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ci.type) ctx {env:=env'})
-      if ci.kind=="def" then
-        IO.println s!":= {ci.value!}"
-      let (_,s):=(CollectAxioms.collect n).run env' |>.run {}
-      IO.println s.axioms
-      IO.println s!"isTarget? : {marked.contains n}"
-      --let nc:=isNoncomputable env' n
-      --IO.println s!"noncomputable: {nc}"
-      ret:=ret.push ⟨ n,ci,s.axioms⟩
       if let .defnInfo dv := ci then
         if dv.safety != .safe then
           throw <| IO.userError s!"unsafe/partial function {n} detected"
+      if (← isHumanDecl n) then
+        IO.println "---"
+        IO.println ci.kind
+        IO.println n
+        IO.println <| ←  Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ci.type) ctx {env:=env'})
+        if ci.kind=="def" then
+          IO.println s!":= {ci.value!}"
+        let (_,s):=(CollectAxioms.collect n).run env' |>.run {}
+        IO.println s.axioms
+        IO.println s!"isTarget? : {marked.contains n}"
+        --let nc:=isNoncomputable env' n
+        --IO.println s!"noncomputable: {nc}"
+        ret:=ret.push ⟨ n,ci,s.axioms⟩
 
   if targets.size>0 then
     for ⟨ n,ci,axs⟩ in targets do
-      if let some ci':=env'.constants.map₂.find? n then
-        if ci.kind ≠ ci'.kind then
-          throw <| IO.userError s!"{ci'.kind} {n} is not the same kind as the requirement {ci.kind} {n}"
-        if ci'.kind=="theorem" then
-          if Not (equivThm ci ci') then
-            throw <| IO.userError s!"theorem {n} does not have the same type as the requirement"
-        if ci'.kind=="def" then
-          if Not (equivDefn ci ci' (`sorryAx ∉ axs)) then
-            throw <| IO.userError s!"definition {n} does not match the requirement"
-          --if (¬ nc) && isNoncomputable env' n then
-          --  throw <| IO.userError s!"definition {n} is noncomputable"
-        -- let allow_sorry? := marked.length > 0 || n ∈ marked
-        let allow_sorry? := n ∈ marked
-        if (← isHumanDecl n) then
+      if (← isHumanDecl n) then
+        if let some ci':=env'.constants.map₂.find? n then
+          if ci.kind ≠ ci'.kind then
+            throw <| IO.userError s!"{ci'.kind} {n} is not the same kind as the requirement {ci.kind} {n}"
+          if ci'.kind=="theorem" then
+            if Not (equivThm ci ci') then
+              throw <| IO.userError s!"theorem {n} does not match the required theorem signature"
+          if ci'.kind=="def" then
+            if Not (equivDefn ci ci' (`sorryAx ∉ axs)) then
+              throw <| IO.userError s!"definition {n} does not match the requirement"
+            --if (¬ nc) && isNoncomputable env' n then
+            --  throw <| IO.userError s!"definition {n} is noncomputable"
+          -- let allow_sorry? := marked.length > 0 || n ∈ marked
+          let allow_sorry? := n ∈ marked
           checkAxioms env' n allow_sorry?
-      else
-        throw <| IO.userError s!"{n} not found in submission"
+        else
+          throw <| IO.userError s!"{n} not found in submission"
   --env'.freeRegions
   --region.free
   return ret

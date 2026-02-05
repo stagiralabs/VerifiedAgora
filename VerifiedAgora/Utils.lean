@@ -84,7 +84,6 @@ def equivThm (cinfo₁ cinfo₂ : ConstantInfo) : Bool := Id.run do
   return tval₁.name == tval₂.name
     && tval₁.type == tval₂.type
     && tval₁.levelParams == tval₂.levelParams
-    && tval₁.all == tval₂.all
 
 /-
 Check if two definitions have the same type and name.
