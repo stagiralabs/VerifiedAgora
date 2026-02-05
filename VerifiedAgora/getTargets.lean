@@ -167,7 +167,10 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
     -- if let .error e:=task.get then
     --   IO.eprintln s!"found a problem in submission."
     --   throw e
-    let _ ← replayFileDirect env_sub targetInfos (targetData.filterMap (fun (_,ci,is_tagged) => if is_tagged then some ci.name else none))
+    -- Use all tagged declarations from the submission environment.
+    -- This ensures we allow `sorryAx` only for tagged decls, without
+    -- accidentally dropping tagged items filtered out by `onlyHuman`.
+    let _ ← replayFileDirect env_sub targetInfos (targetSubmittedDecls.toList)
 
     IO.println s!"Finished with no errors; building file descriptor."
 
