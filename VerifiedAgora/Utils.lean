@@ -63,7 +63,7 @@ def checkAxioms (env: Environment) (n: Name) (allow_sorry? : Bool := false): IO 
   for a in s.axioms do
     let ax := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
     if a ∉ ax then
-      throw <| IO.userError s!"{a} is not in the allowed set of standard axioms"
+      throw <| IO.userError s!"{a} is not in the allowed set of standard axioms ({n})"
 
 structure Info where
   name: Name
