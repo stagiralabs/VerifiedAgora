@@ -167,10 +167,36 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
       else
         cs.msgs.all (fun m => m.severity != MessageSeverity.error && m.severity != MessageSeverity.warning)
       -- i.e. tagged items can have warnings, untagged items cannot
+    let disallowedMsg? (is_tagged : Bool) (severity : MessageSeverity) : Bool :=
+      if is_tagged then
+        severity == MessageSeverity.error
+      else
+        severity == MessageSeverity.error || severity == MessageSeverity.warning
+    let collectViolations (sourceLabel : String) (items : List (CompilationStep × ConstantInfo × Bool)) : IO (Array Json) := do
+      let mut violations : Array Json := #[]
+      for (cs, ci, is_tagged) in items do
+        for m in cs.msgs do
+          if disallowedMsg? is_tagged m.severity then
+            let msgText ← m.data.toString
+            violations := violations.push <| Json.mkObj [
+              ("source", Json.str sourceLabel),
+              ("name", Json.str ci.name.toString),
+              ("is_tagged", Json.bool is_tagged),
+              ("severity", ToJson.toJson m.severity),
+              ("message", Json.str msgText)
+            ]
+      return violations
     let all_targets_correct := targetData.all (fun (cs, _, is_tagged) => correct? cs is_tagged)
     let all_submitted_correct := submittedData.all (fun (cs, _, is_tagged) => correct? cs is_tagged)
     if not (all_targets_correct && all_submitted_correct) then
-      throw <| IO.userError s!"The submission or target contains errors or warnings outside of the tagged items."
+      let targetViolations ← collectViolations "target" targetData
+      let submittedViolations ← collectViolations "submission" submittedData
+      let diagnostics := Json.mkObj [
+        ("summary", Json.str "The submission or target contains errors or warnings outside of the tagged items."),
+        ("rule", Json.str "Untagged declarations may not emit errors or warnings; tagged declarations may emit warnings but not errors."),
+        ("offending_messages", Json.arr (targetViolations ++ submittedViolations))
+      ]
+      throw <| IO.userError s!"The submission or target contains errors or warnings outside of the tagged items.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
     IO.println "Checked no errors/warnings outside tagged items"
 
     -- all rules passed, now run safeVerify
