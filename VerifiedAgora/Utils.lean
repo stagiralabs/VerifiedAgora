@@ -65,6 +65,32 @@ def checkAxioms (env: Environment) (n: Name) (allow_sorry? : Bool := false): IO 
     if a ∉ ax then
       throw <| IO.userError s!"{a} is not in the allowed set of standard axioms ({n})"
 
+/-- Returns `(usesSorry, disallowedAxioms, syntheticMsgs)` for declaration `n` in `env`.
+Synthetic messages classify `sorryAx` as warning and disallowed axioms as error. -/
+def axiomAudit (env : Environment) (n : Name) :
+    (Bool × Array Name × List (MessageSeverity × String)) := Id.run do
+  let (_, s) := (CollectAxioms.collect n).run env |>.run {}
+  let axioms := s.axioms
+
+  let usesSorry := axioms.contains `sorryAx
+  let disallowed := axioms.filter (fun a => a ∉ TargetsAllowedAxioms)
+
+  let mut msgs : List (MessageSeverity × String) := []
+  if usesSorry then
+    msgs := msgs ++ [(MessageSeverity.warning, "[Agora Warning] relies on sorryAx")]
+
+  if disallowed.size > 0 then
+    msgs := msgs ++ [(
+      MessageSeverity.error,
+      s!"[Agora Error] relies on disallowed axioms: {String.intercalate ", " (disallowed.toList.map Name.toString)}"
+    )]
+
+  (usesSorry, disallowed, msgs)
+
+/-- Removes duplicate `(severity, message)` pairs while preserving order. -/
+def dedupMessages (msgs : List (MessageSeverity × String)) : List (MessageSeverity × String) :=
+  msgs.foldl (fun acc msg => if acc.contains msg then acc else acc ++ [msg]) []
+
 structure Info where
   name: Name
   constInfo: ConstantInfo
@@ -84,7 +110,6 @@ def equivThm (cinfo₁ cinfo₂ : ConstantInfo) : Bool := Id.run do
   return tval₁.name == tval₂.name
     && tval₁.type == tval₂.type
     && tval₁.levelParams == tval₂.levelParams
-    && tval₁.all == tval₂.all
 
 /-
 Check if two definitions have the same type and name.

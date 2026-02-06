@@ -32,41 +32,42 @@ unsafe def replayFileDirect (final_env : Environment) (targets : Array _root_.In
   let mut ret:Array _root_.Info:= #[]
   for (n,ci) in env'.constants.map₂  do
     if ci.kind ∈ ["theorem", "def"] then
-      IO.println "---"
-      IO.println ci.kind
-      IO.println n
-      IO.println <| ←  Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ci.type) ctx {env:=env'})
-      if ci.kind=="def" then
-        IO.println s!":= {ci.value!}"
-      let (_,s):=(CollectAxioms.collect n).run env' |>.run {}
-      IO.println s.axioms
-      IO.println s!"isTarget? : {marked.contains n}"
-      --let nc:=isNoncomputable env' n
-      --IO.println s!"noncomputable: {nc}"
-      ret:=ret.push ⟨ n,ci,s.axioms⟩
       if let .defnInfo dv := ci then
         if dv.safety != .safe then
           throw <| IO.userError s!"unsafe/partial function {n} detected"
+      if (← isHumanDecl n) then
+        IO.println "---"
+        IO.println ci.kind
+        IO.println n
+        IO.println <| ←  Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ci.type) ctx {env:=env'})
+        if ci.kind=="def" then
+          IO.println s!":= {ci.value!}"
+        let (_,s):=(CollectAxioms.collect n).run env' |>.run {}
+        IO.println s.axioms
+        IO.println s!"isTarget? : {marked.contains n}"
+        --let nc:=isNoncomputable env' n
+        --IO.println s!"noncomputable: {nc}"
+        ret:=ret.push ⟨ n,ci,s.axioms⟩
 
   if targets.size>0 then
     for ⟨ n,ci,axs⟩ in targets do
-      if let some ci':=env'.constants.map₂.find? n then
-        if ci.kind ≠ ci'.kind then
-          throw <| IO.userError s!"{ci'.kind} {n} is not the same kind as the requirement {ci.kind} {n}"
-        if ci'.kind=="theorem" then
-          if Not (equivThm ci ci') then
-            throw <| IO.userError s!"theorem {n} does not have the same type as the requirement"
-        if ci'.kind=="def" then
-          if Not (equivDefn ci ci' (`sorryAx ∉ axs)) then
-            throw <| IO.userError s!"definition {n} does not match the requirement"
-          --if (¬ nc) && isNoncomputable env' n then
-          --  throw <| IO.userError s!"definition {n} is noncomputable"
-        -- let allow_sorry? := marked.length > 0 || n ∈ marked
-        let allow_sorry? := n ∈ marked
-        if (← isHumanDecl n) then
+      if (← isHumanDecl n) then
+        if let some ci':=env'.constants.map₂.find? n then
+          if ci.kind ≠ ci'.kind then
+            throw <| IO.userError s!"{ci'.kind} {n} is not the same kind as the requirement {ci.kind} {n}"
+          if ci'.kind=="theorem" then
+            if Not (equivThm ci ci') then
+              throw <| IO.userError s!"theorem {n} does not match the required theorem signature"
+          if ci'.kind=="def" then
+            if Not (equivDefn ci ci' (`sorryAx ∉ axs)) then
+              throw <| IO.userError s!"definition {n} does not match the requirement"
+            --if (¬ nc) && isNoncomputable env' n then
+            --  throw <| IO.userError s!"definition {n} is noncomputable"
+          -- let allow_sorry? := marked.length > 0 || n ∈ marked
+          let allow_sorry? := n ∈ marked
           checkAxioms env' n allow_sorry?
-      else
-        throw <| IO.userError s!"{n} not found in submission"
+        else
+          throw <| IO.userError s!"{n} not found in submission"
   --env'.freeRegions
   --region.free
   return ret
@@ -161,17 +162,101 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
       throw <| IO.userError s!"The submission does not contain the same tagged declarations as the target:\n {targets_tagged}\n [vs]\n {submitted_tagged}"
     IO.println "Checked same tagged declarations"
 
+    let compilerMsgs (cs : CompilationStep) : IO (List (MessageSeverity × String)) := do
+      let mut msgs := #[]
+      for m in cs.msgs do
+        let st ← m.data.toString
+        msgs := msgs.push (m.severity, st)
+      pure msgs.toList
+
+    let descriptorMsgs (env : Environment) (item : CompilationStep × ConstantInfo × Bool) :
+        IO (List (MessageSeverity × String)) := do
+      let (cs, ci, is_tagged) := item
+      let baseMsgs ← compilerMsgs cs
+      let syntheticMsgs :=
+        if is_tagged then
+          let (_, _, msgs) := axiomAudit env ci.name
+          msgs
+        else
+          []
+      return dedupMessages (baseMsgs ++ syntheticMsgs)
+
+    let isResolved (msgs : List (MessageSeverity × String)) : Bool :=
+      msgs.all (fun (sev, _) => sev != MessageSeverity.error && sev != MessageSeverity.warning)
+
+    let msgsToJson (msgs : List (MessageSeverity × String)) : Json :=
+      Json.arr <| msgs.toArray.map (fun (sev, data) =>
+        Json.mkObj [("severity", ToJson.toJson sev), ("data", Json.str data)]
+      )
+
     let correct? (cs : CompilationStep) (is_tagged: Bool) : Bool :=
       if is_tagged then
         cs.msgs.all (fun m => m.severity != MessageSeverity.error)
       else
         cs.msgs.all (fun m => m.severity != MessageSeverity.error && m.severity != MessageSeverity.warning)
       -- i.e. tagged items can have warnings, untagged items cannot
+    let disallowedMsg? (is_tagged : Bool) (severity : MessageSeverity) : Bool :=
+      if is_tagged then
+        severity == MessageSeverity.error
+      else
+        severity == MessageSeverity.error || severity == MessageSeverity.warning
+    let collectViolations (sourceLabel : String) (items : List (CompilationStep × ConstantInfo × Bool)) : IO (Array Json) := do
+      let mut violations : Array Json := #[]
+      for (cs, ci, is_tagged) in items do
+        for m in cs.msgs do
+          if disallowedMsg? is_tagged m.severity then
+            let msgText ← m.data.toString
+            violations := violations.push <| Json.mkObj [
+              ("source", Json.str sourceLabel),
+              ("name", Json.str ci.name.toString),
+              ("is_tagged", Json.bool is_tagged),
+              ("severity", ToJson.toJson m.severity),
+              ("message", Json.str msgText)
+            ]
+      return violations
     let all_targets_correct := targetData.all (fun (cs, _, is_tagged) => correct? cs is_tagged)
     let all_submitted_correct := submittedData.all (fun (cs, _, is_tagged) => correct? cs is_tagged)
     if not (all_targets_correct && all_submitted_correct) then
-      throw <| IO.userError s!"The submission or target contains errors or warnings outside of the tagged items."
+      let targetViolations ← collectViolations "target" targetData
+      let submittedViolations ← collectViolations "submission" submittedData
+      let diagnostics := Json.mkObj [
+        ("summary", Json.str "The submission or target contains errors or warnings outside of the tagged items."),
+        ("rule", Json.str "Untagged declarations may not emit errors or warnings; tagged declarations may emit warnings but not errors."),
+        ("offending_messages", Json.arr (targetViolations ++ submittedViolations))
+      ]
+      throw <| IO.userError s!"The submission or target contains errors or warnings outside of the tagged items.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
     IO.println "Checked no errors/warnings outside tagged items"
+
+    -- disallow regressions where a previously resolved target becomes unresolved
+    let targetTaggedData := targetData.filter (fun (_, _, is_tagged) => is_tagged)
+    let submittedTaggedData := submittedData.filter (fun (_, _, is_tagged) => is_tagged)
+    if targetTaggedData.length != submittedTaggedData.length then
+      throw <| IO.userError "Internal error: tagged declaration counts differ after parity checks."
+
+    let mut regressions : Array Json := #[]
+    for (targetItem, submittedItem) in List.zip targetTaggedData submittedTaggedData do
+      let (_, targetCi, _) := targetItem
+      let (_, submittedCi, _) := submittedItem
+      if targetCi.name != submittedCi.name then
+        throw <| IO.userError s!"Internal error: tagged declaration mismatch at {targetCi.name} vs {submittedCi.name}"
+
+      let targetMsgs ← descriptorMsgs env_targ targetItem
+      let submittedMsgs ← descriptorMsgs env_sub submittedItem
+      if isResolved targetMsgs && !(isResolved submittedMsgs) then
+        regressions := regressions.push <| Json.mkObj [
+          ("name", Json.str targetCi.name.toString),
+          ("target_messages", msgsToJson targetMsgs),
+          ("submission_messages", msgsToJson submittedMsgs)
+        ]
+
+    if regressions.size > 0 then
+      let diagnostics := Json.mkObj [
+        ("summary", Json.str "Resolved targets regressed to unresolved status."),
+        ("rule", Json.str "A tagged declaration that is resolved in the target must remain resolved in the submission."),
+        ("regressions", Json.arr regressions)
+      ]
+      throw <| IO.userError s!"Resolved target regression detected.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
+    IO.println "Checked no resolved target regressions"
 
     -- all rules passed, now run safeVerify
     let targetInfos ← replayFileDirect env_targ
@@ -185,15 +270,12 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
 
     let toDeclDescriptor (item : (CompilationStep × ConstantInfo × Bool)) : IO DeclarationDescriptor := do
       let (cs, ci, is_tagged) := item
-      let mut msgs := #[]
-      for m in cs.msgs do
-        let st ← m.data.toString
-        msgs := msgs.push (m.severity, st)
+      let msgs ← descriptorMsgs env_sub item
       return  {
         ci := ci,
         contents := cs.src,
         context := (Substring.mk cs.src.str 0 cs.src.startPos),
-        msgs? := some msgs.toList,
+        msgs? := some msgs,
         target? := is_tagged,
         sourceFile? := source_file
       }
