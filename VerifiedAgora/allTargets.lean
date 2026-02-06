@@ -5,31 +5,6 @@ import VerifiedAgora.TacticInvocation
 import VerifiedAgora.Utils
 open Lean Core Elab IO Meta Term Command Tactic Cli
 
-def axiomAudit (env : Environment) (n : Name) :
-    (Bool × Array Name × List (MessageSeverity × String)) := Id.run do
-
-  let (_, s) := (CollectAxioms.collect n).run env |>.run {}
-  let axioms := s.axioms
-
-  let usesSorry := axioms.contains `sorryAx
-
-  -- treat sorry as *warning*, not disallowed error
-  let isAllowed (a : Name) : Bool :=
-    a ∈ TargetsAllowedAxioms
-
-  let disallowed := axioms.filter (fun a => !isAllowed a)
-
-  let mut msgs : List (MessageSeverity × String) := []
-
-  if usesSorry then
-    msgs := msgs ++ [(MessageSeverity.warning, "[Agora Warning] relies on sorryAx")]
-
-  if disallowed.size > 0 then
-    msgs := msgs ++ [(MessageSeverity.error,
-      s!"[Agora Error] relies on disallowed axioms: {String.intercalate ", " (disallowed.toList.map Name.toString)}")]
-
-  (usesSorry, disallowed, msgs)
-
 
 def toDeclDescriptor (ci : ConstantInfo) (source : FileMap) (range : DeclarationRange)  (msgs? : Option (List (MessageSeverity × String))) (target? : Bool) (sourceFile? : Option System.FilePath) : DeclarationDescriptor :=
     {

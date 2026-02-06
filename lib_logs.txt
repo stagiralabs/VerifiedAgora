@@ -1,0 +1,1161 @@
+[Library Mechanics Entrypoint] Checking elan installation...
+[Library Mechanics Entrypoint] Initializing shared elan from /opt/elan...
+[Library Mechanics Entrypoint] Elan copied to shared volume
+[Library Mechanics Entrypoint] Starting application...
+[API] Starting Library Mechanics API server on 0.0.0.0:8001 - Mode: V0.2 (multi-repo, parallel)
+[API] Initializing  execution system...
+[RepoManager] Git configuration successful
+[RepoManager] Initialized with base_path=/shared/library, max_size=10
+[LeanInterfaceRegistry] Initialized
+[ExecutionEngine] Initialized with 4 workers
+[ExecutionEngine] Started 4 workers
+[API]  execution system initialized successfully
+[API] Projects are stored in the database - no discovery needed
+[Worker 0] Started
+[Worker 1] Started
+[Worker 2] Started
+[Worker 3] Started
+INFO:     127.0.0.1:57914 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38078 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36780 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:56456 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:44174 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58922 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:49056 - "GET /projects HTTP/1.1" 200 OK
+INFO:     172.25.0.7:52246 - "GET /projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33550 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54834 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:54420 - "GET /projects HTTP/1.1" 200 OK
+INFO:     172.25.0.7:54420 - "GET /projects?agent_id=0ee84a49-4238-4418-b7c0-9d3e1a8b802b HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43276 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34580 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35942 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:48770 - "POST /projects HTTP/1.1" 200 OK
+[GitHubIntegration] get_or_create_fork: stagiralabs/eval_InformationTheory
+INFO:     172.25.0.7:48770 - "GET /projects?agent_id=0ee84a49-4238-4418-b7c0-9d3e1a8b802b HTTP/1.1" 200 OK
+[GitHubIntegration] Found existing fork: stagira-labs/stagiralabs_eval_InformationTheory
+[GitHubIntegration] Syncing stagira-labs/stagiralabs_eval_InformationTheory:main with upstream
+[GitHubIntegration] Fork already up to date or has conflicts
+[GitHubIntegration] Ensuring agora branch project_99342d3d-5d89-4746-91fd-60ea3946b6f2 exists (from better_error_messages -> 870ba90e)
+[GitHubIntegration] Creating branch project_99342d3d-5d89-4746-91fd-60ea3946b6f2 from 870ba90e
+INFO:     172.25.0.7:48770 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+[RepoManager] Cloning https://github.com/stagira-labs/stagiralabs_eval_InformationTheory @ project_99342d3d-5d89-4746-91fd-60ea3946b6f2 to /shared/library/99342d3d-5d89-4746-91fd-60ea3946b6f2
+[GitHubIntegration] Branch project_99342d3d-5d89-4746-91fd-60ea3946b6f2 created successfully
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+[RepoManager] Successfully cloned https://github.com/stagira-labs/stagiralabs_eval_InformationTheory @ project_99342d3d-5d89-4746-91fd-60ea3946b6f2
+[RepoManager] Added to cache: project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterfaceRegistry] Creating new interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterface] Initialized for /shared/library/99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterfaceRegistry] Initializing repository at /shared/library/99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterfaceRegistry] This may take several minutes - logs will stream below...
+
+[LeanInterfaceRegistry] === Step 0/2: Running 'lake exe cache get' ===
+[LeanInterfaceRegistry] Downloading pre-built artifacts to speed up build...
+[LeanInterfaceRegistry] Waiting 5s for network stabilization...
+[RepoManager] Cache hit for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     127.0.0.1:45932 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35702 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35222 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42720 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42518 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58588 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42676 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+installing leantar 0.1.14
+INFO:     127.0.0.1:35772 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+Attempting to download 6296 file(s)
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42200 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34574 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+Decompressing 6296 file(s)
+Unpacked in 14066 ms
+Completed successfully!
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+No files to download
+Decompressing 6296 file(s)
+Unpacked in 162 ms
+Completed successfully!
+[LeanInterfaceRegistry] Cache download completed successfully
+
+[LeanInterfaceRegistry] === Step 1/2: Running 'lake update' ===
+[LeanInterfaceRegistry] Fetching dependency manifests...
+INFO:     127.0.0.1:44666 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54000 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35356 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43950 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58922 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:41954 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+No files to download
+Decompressing 6296 file(s)
+Unpacked in 7753 ms
+Completed successfully!
+[LeanInterfaceRegistry] lake update completed successfully
+
+[LeanInterfaceRegistry] === Step 2/2: Running 'lake build' ===
+[LeanInterfaceRegistry] Building repository (may take several minutes)...
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48736 - "GET /health HTTP/1.1" 200 OK
+✔ [3/2223] Built VerifiedAgora.tagger
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+⚠ [2219/2223] Built InformationTheory.Hamming
+warning: ././././InformationTheory/Hamming.lean:43:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:51:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:55:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:60:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:72:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:76:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:80:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:84:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:88:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:92:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:95:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:98:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:101:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:105:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:109:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:114:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:126:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:130:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:134:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:138:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:142:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:146:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:150:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:153:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:156:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:159:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:163:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:167:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:171:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:178:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:256:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:259:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:262:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:265:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:268:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:271:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:274:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:277:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:280:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:283:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:286:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:290:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:294:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:298:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:302:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:306:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:319:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:323:0: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:338:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:349:8: declaration uses 'sorry'
+warning: ././././InformationTheory/Hamming.lean:358:8: declaration uses 'sorry'
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+⚠ [2220/2223] Built InformationTheory.KullbackLeibler.KLFun
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:52:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:57:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:70:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:78:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:96:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:99:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:102:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:107:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:112:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:123:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:129:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:133:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:136:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:152:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/KLFun.lean:156:6: declaration uses 'sorry'
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+⚠ [2221/2223] Built InformationTheory.KullbackLeibler.Basic
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:60:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:74:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:85:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:88:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:96:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:103:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:122:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:135:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:164:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:168:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:173:6: declaration uses 'sorry'
+warning: ././././InformationTheory/KullbackLeibler/Basic.lean:183:6: declaration uses 'sorry'
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+✔ [2222/2223] Built InformationTheory
+Build completed successfully.
+[LeanInterfaceRegistry] Initial build completed successfully
+[LeanInterfaceRegistry] Repository initialization complete (success=True)
+
+[LeanInterfaceRegistry] Registered project 99342d3d-5d89-4746-91fd-60ea3946b6f2 (init_success=True)
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterface] Scanning all targets in /shared/library/99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:39412 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46574 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36004 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_nonneg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_nonneg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_apply
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_apply is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_ne_top_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_ne_top_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.integral_klFun_rnDeriv
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.integral_klFun_rnDeriv is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.toReal_klDiv_eq_integral_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.toReal_klDiv_eq_integral_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.toReal_klDiv_of_measure_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.toReal_klDiv_of_measure_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.toReal_klDiv
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.toReal_klDiv is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.integrable_klFun_rnDeriv_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.integrable_klFun_rnDeriv_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_of_ac_of_integrable
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_of_ac_of_integrable is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.rightDeriv_klFun_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.rightDeriv_klFun_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.mul_log_le_toReal_klDiv
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.mul_log_le_toReal_klDiv is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.leftDeriv_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.leftDeriv_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.deriv_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.deriv_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_zero_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_zero_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.convexOn_Ioi_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.convexOn_Ioi_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_top_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_top_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.mul_klFun_le_toReal_klDiv
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.mul_klFun_le_toReal_klDiv is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_lintegral_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_lintegral_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.stronglyMeasurable_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.stronglyMeasurable_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_zero_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_zero_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.measurable_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.measurable_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.rightDeriv_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.rightDeriv_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.not_differentiableWithinAt_klFun_Iio_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.not_differentiableWithinAt_klFun_Iio_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.isMinOn_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.isMinOn_klFun is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_eq_zero_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.klFun_eq_zero_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.mul_log_le_klDiv
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.mul_log_le_klDiv is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_self
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_self is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.leftDeriv_klFun_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.leftDeriv_klFun_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.tendsto_rightDeriv_klFun_atTop
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.tendsto_rightDeriv_klFun_atTop is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.not_differentiableWithinAt_klFun_Ioi_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/KLFun.lean:AgoraInformationTheory.InformationTheory.not_differentiableWithinAt_klFun_Ioi_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_integral_klFun
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/KullbackLeibler/Basic.lean:AgoraInformationTheory.InformationTheory.klDiv_eq_integral_klFun is unsatisfied (has errors/warnings)
+[LeanInterface] Scan complete: 84 targets found, 0 solved, 84 unsolved, 0 errors
+[API] Scanned 84 targets in project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+[AGORA_LOG] Created and pushed AGORA_LOG.md at /shared/library/99342d3d-5d89-4746-91fd-60ea3946b6f2
+[GitHubIntegration] Creating draft PR: stagira-labs:project_99342d3d-5d89-4746-91fd-60ea3946b6f2 -> stagiralabs/eval_InformationTheory:better_error_messages
+[GitHubIntegration] Draft PR created: https://github.com/stagiralabs/eval_InformationTheory/pull/154
+[API] Created draft PR: https://github.com/stagiralabs/eval_InformationTheory/pull/154
+[API] Project 99342d3d-5d89-4746-91fd-60ea3946b6f2 initialized successfully
+INFO:     172.25.0.7:55268 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55268 - "POST /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/mark_targets_synced HTTP/1.1" 200 OK
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:55268 - "GET /repo_files?project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56166 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:60584 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:60590 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_status HTTP/1.1" 200 OK
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:60584 - "GET /library_file?file_name=InformationTheory%2FHamming.lean&project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.8:54640 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56938 - "GET /health HTTP/1.1" 200 OK
+[RequestScheduler] Created new queue for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+
+[RepoQueue] + Adding request #1: InformationTheory.Hamming
+[RepoQueue]    Request ID: 86e1b5f9...
+[RepoQueue]    Ephemeral: False
+[RepoQueue]    Dependencies: (none)
+
+[RepoQueue] >> 1 request(s) became ready:
+  + InformationTheory.Hamming (all dependencies satisfied)
+
+================================================================================
+[QUEUE STATE] Project: 99342d3d-5d89-4746-91fd-60ea3946b6f2
+================================================================================
+
+[INPUT ORDER] Requests received in this order:
+  1. + [ready     ] InformationTheory.Hamming (id: 86e1b5f9...)
+
+[DEPENDENCY TREE]
+
+  Independent modules (can run in parallel):
+    * InformationTheory.Hamming [ready]
+
+[PARALLEL EXECUTION OPPORTUNITIES]
+  Ready to execute (1 in queue):
+
+[EXECUTION WAVES] If all started now:
+  Wave 1 (parallel): InformationTheory.Hamming
+================================================================================
+
+[ExecutionEngine] Submitted request 86e1b5f9-0f27-46df-8f33-9bc645ffa2e5 for InformationTheory.Hamming
+[RepoQueue] > Started execution: InformationTheory.Hamming
+[Worker 0] Processing request 86e1b5f9-0f27-46df-8f33-9bc645ffa2e5: InformationTheory.Hamming
+[RepoManager] Cache hit for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterface] add_contribution: name=InformationTheory/Hamming.lean, file_exists=True
+[LeanInterface] Running get_targets: lake exe get_targets --submission=12479 --target=InformationTheory/Hamming.lean
+[LeanInterface] Updated InformationTheory.lean with 3 imports
+[LeanInterface] Running lake build for module: InformationTheory.Hamming
+[LeanInterface] Lake build InformationTheory.Hamming completed with return code 0
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right is satisfied
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[AGORA_LOG] Logged: Modified InformationTheory/Hamming.lean
+[LeanInterface] Committed and pushed: [Agora] Modified: InformationTheory/Hamming.lean
+[LeanInterface] Contribution added successfully: InformationTheory/Hamming.lean
+
+[RepoQueue] v Completed: InformationTheory.Hamming (ephemeral=False)
+
+[RepoQueue] Queue state after completing InformationTheory.Hamming:
+
+================================================================================
+[QUEUE STATE] Project: 99342d3d-5d89-4746-91fd-60ea3946b6f2
+================================================================================
+
+[INPUT ORDER] Requests received in this order:
+  1. v [completed ] InformationTheory.Hamming (id: 86e1b5f9...)
+
+[DEPENDENCY TREE]
+
+  Independent modules (can run in parallel):
+    * InformationTheory.Hamming [completed]
+
+[PARALLEL EXECUTION OPPORTUNITIES]
+  (none - waiting for dependencies or all complete)
+
+[EXECUTION WAVES] If all started now:
+  Wave 1 (parallel): InformationTheory.Hamming
+================================================================================
+
+[Worker 0] Completed request 86e1b5f9-0f27-46df-8f33-9bc645ffa2e5
+INFO:     172.25.0.7:60388 - "POST /add_contribution?name=InformationTheory%2FHamming.lean&file_content=import+VerifiedAgora.tagger%0A%2F-%0ACopyright+%28c%29+2022+Wrenna+Robson.+All+rights+reserved.%0AReleased+under+Apache+2.0+license+as+described+in+the+file+LICENSE.%0AAuthors%3A+Wrenna+Robson%0A-%2F%0Aimport+Mathlib.Analysis.Normed.Group.Basic%0A%0A%2F-%21%0A%23+Hamming+spaces%0A%0AThe+Hamming+metric+counts+the+number+of+places+two+members+of+a+%28finite%29+Pi+type%0Adiffer.+The+Hamming+norm+is+the+same+as+the+Hamming+metric+over+additive+groups%2C+and%0Acounts+the+number+of+places+a+member+of+a+%28finite%29+Pi+type+differs+from+zero.%0A%0AThis+is+a+useful+notion+in+various+applications%2C+but+in+particular+it+is+relevant%0Ain+coding+theory%2C+in+which+it+is+fundamental+for+defining+the+minimum+distance+of+a%0Acode.%0A%0A%23%23+Main+definitions%0A%2A+%60hammingDist+x+y%60%3A+the+Hamming+distance+between+%60x%60+and+%60y%60%2C+the+number+of+entries+which+differ.%0A%2A+%60hammingNorm+x%60%3A+the+Hamming+norm+of+%60x%60%2C+the+number+of+non-zero+entries.%0A%2A+%60Hamming+%CE%B2%60%3A+a+type+synonym+for+%60%CE%A0+i%2C+%CE%B2+i%60+with+%60dist%60+and+%60norm%60+provided+by+the+above.%0A%2A+%60Hamming.toHamming%60%2C+%60Hamming.ofHamming%60%3A+functions+for+casting+between+%60Hamming+%CE%B2%60+and%0A%60%CE%A0+i%2C+%CE%B2+i%60.%0A%2A+the+Hamming+norm+forms+a+normed+group+on+%60Hamming+%CE%B2%60.%0A-%2F%0A%0Anamespace+AgoraInformationTheory%0A%0Asection+HammingDistNorm%0A%0Aopen+Finset+Function%0A%0Avariable+%7B%CE%B1+%CE%B9+%3A+Type%2A%7D+%7B%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%7D+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D%0Avariable+%7B%CE%B3+%3A+%CE%B9+%E2%86%92+Type%2A%7D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B3+i%29%5D%0A%0A%2F--+The+Hamming+distance+function+to+the+naturals.+-%2F%0Adef+hammingDist+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+%E2%84%95+%3A%3D+%23%7Bi+%7C+x+i+%E2%89%A0+y+i%7D%0A%0A%2F--+Corresponds+to+%60dist_self%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_self+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+x+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_nonneg%60.+-%2F%0Atheorem+hammingDist_nonneg+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%E2%89%A4+hammingDist+x+y+%3A%3D%0A++zero_le+_%0A%0A%2F--+Corresponds+to+%60dist_comm%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_comm+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+y+%3D+hammingDist+y+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+z+%E2%89%A4+hammingDist+x+y+%2B+hammingDist+y+z+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle_left%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle_left+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%E2%89%A4+hammingDist+z+x+%2B+hammingDist+z+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle_right%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle_right+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%E2%89%A4+hammingDist+x+z+%2B+hammingDist+y+z+%3A%3D+by%0A++rw+%5BhammingDist_comm+y%5D%0A++exact+hammingDist_triangle+_+_+_%0A%0A%2F--+Corresponds+to+%60swap_dist%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+swap_hammingDist+%3A+swap+%28%40hammingDist+_+%CE%B2+_+_%29+%3D+hammingDist+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60eq_of_dist_eq_zero%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+eq_of_hammingDist_eq_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3D+0+%E2%86%92+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_eq_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_eq_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3D+0+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60zero_eq_dist%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hamming_zero_eq_dist+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3D+hammingDist+x+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_ne_zero%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_ne_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%E2%89%A0+0+%E2%86%94+x+%E2%89%A0+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_pos%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_pos+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3C+hammingDist+x+y+%E2%86%94+x+%E2%89%A0+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_lt_one+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3C+1+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_le_card_fintype+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%E2%89%A4+Fintype.card+%CE%B9+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_comp_le_hammingDist+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%3A%0A++++%28hammingDist+%28fun+i+%3D%3E+f+i+%28x+i%29%29+fun+i+%3D%3E+f+i+%28y+i%29%29+%E2%89%A4+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_comp+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf+%3A+%E2%88%80+i%2C+Injective+%28f+i%29%29+%3A%0A++++%28hammingDist+%28fun+i+%3D%3E+f+i+%28x+i%29%29+fun+i+%3D%3E+f+i+%28y+i%29%29+%3D+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_smul_le_hammingDist+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++hammingDist+%28k+%E2%80%A2+x%29+%28k+%E2%80%A2+y%29+%E2%89%A4+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_smul%60+with+the+discrete+norm+on+%60%CE%B1%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D%0A++++%28hk+%3A+%E2%88%80+i%2C+IsSMulRegular+%28%CE%B2+i%29+k%29+%3A+hammingDist+%28k+%E2%80%A2+x%29+%28k+%E2%80%A2+y%29+%3D+hammingDist+x+y+%3A%3D+by+sorry%0A%0Asection+Zero%0A%0Avariable+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+Zero+%28%CE%B3+i%29%5D%0A%0A%2F--+The+Hamming+weight+function+to+the+naturals.+-%2F%0Adef+hammingNorm+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+%E2%84%95+%3A%3D+%23%7Bi+%7C+x+i+%E2%89%A0+0%7D%0A%0A%2F--+Corresponds+to+%60dist_zero_right%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_zero_right+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+0+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_zero_left%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_zero_left+%3A+hammingDist+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+hammingNorm+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_nonneg%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingNorm_nonneg+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_zero+%3A+hammingNorm+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_eq_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_eq_zero+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%3D+0+%E2%86%94+x+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_ne_zero_iff%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingNorm_ne_zero_iff+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%E2%89%A0+0+%E2%86%94+x+%E2%89%A0+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_pos_iff%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_pos_iff+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3C+hammingNorm+x+%E2%86%94+x+%E2%89%A0+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_lt_one+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%3C+1+%E2%86%94+x+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_le_card_fintype+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%E2%89%A4+Fintype.card+%CE%B9+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_comp_le_hammingNorm+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf+%3A+%E2%88%80+i%2C+f+i+0+%3D+0%29+%3A%0A++++%28hammingNorm+fun+i+%3D%3E+f+i+%28x+i%29%29+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_comp+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf%E2%82%81+%3A+%E2%88%80+i%2C+Injective+%28f+i%29%29%0A++++%28hf%E2%82%82+%3A+%E2%88%80+i%2C+f+i+0+%3D+0%29+%3A+%28hammingNorm+fun+i+%3D%3E+f+i+%28x+i%29%29+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_smul_le_hammingNorm+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D%0A++++%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+%28k+%E2%80%A2+x%29+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_smul+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D%0A++++%28hk+%3A+%E2%88%80+i%2C+IsSMulRegular+%28%CE%B2+i%29+k%29+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingNorm+%28k+%E2%80%A2+x%29+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0Aend+Zero%0A%0A%2F--+Corresponds+to+%60dist_eq_norm%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_eq_hammingNorm+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%3D+hammingNorm+%28x+-+y%29+%3A%3D+by+sorry%0A%0Aend+HammingDistNorm%0A%0A%2F-%21+%23%23%23+The+%60Hamming%60+type+synonym+-%2F%0A%0A%0A%2F--+Type+synonym+for+a+Pi+type+which+inherits+the+usual+algebraic+instances%2C+but+is+equipped+with%0Athe+Hamming+metric+and+norm%2C+instead+of+%60Pi.normedAddCommGroup%60+which+uses+the+sup+norm.+-%2F%0Adef+Hamming+%7B%CE%B9+%3A+Type%2A%7D+%28%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%29+%3A+Type+_+%3A%3D%0A++%E2%88%80+i%2C+%CE%B2+i%0A%0Anamespace+Hamming%0A%0Avariable+%7B%CE%B1+%CE%B9+%3A+Type%2A%7D+%7B%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%7D%0A%0A%2F-%21+Instances+inherited+from+normal+Pi+types.+-%2F%0A%0Ainstance+%5B%E2%88%80+i%2C+Inhabited+%28%CE%B2+i%29%5D+%3A+Inhabited+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+_+%3D%3E+default%E2%9F%A9%0A%0Ainstance+%5BDecidableEq+%CE%B9%5D+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+Fintype+%28%CE%B2+i%29%5D+%3A+Fintype+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instFintype%0A%0Ainstance+%5BInhabited+%CE%B9%5D+%5B%E2%88%80+i%2C+Nonempty+%28%CE%B2+i%29%5D+%5BNontrivial+%28%CE%B2+default%29%5D+%3A+Nontrivial+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.nontrivial%0A%0Ainstance+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D+%3A+DecidableEq+%28Hamming+%CE%B2%29+%3A%3D%0A++Fintype.decidablePiFintype%0A%0Ainstance+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+Zero+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instZero%0A%0Ainstance+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%3A+Neg+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instNeg%0A%0Ainstance+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%3A+Add+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instAdd%0A%0Ainstance+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%3A+Sub+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instSub%0A%0Ainstance+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%3A+SMul+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instSMul%0A%0Ainstance+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%3A+SMulWithZero+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.smulWithZero+_%0A%0Ainstance+%5B%E2%88%80+i%2C+AddMonoid+%28%CE%B2+i%29%5D+%3A+AddMonoid+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addMonoid%0A%0Ainstance+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%3A+AddGroup+%28Hamming+%CE%B2%29+%3A%3D+Pi.addGroup%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommMonoid+%28%CE%B2+i%29%5D+%3A+AddCommMonoid+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addCommMonoid%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommGroup+%28%CE%B2+i%29%5D+%3A+AddCommGroup+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addCommGroup%0A%0Ainstance+%28%CE%B1%29+%5BSemiring+%CE%B1%5D+%28%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%29+%5B%E2%88%80+i%2C+AddCommMonoid+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+Module+%CE%B1+%28%CE%B2+i%29%5D+%3A%0A++++Module+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.module+_+_+_%0A%0A%2F-%21+API+to%2Ffrom+the+type+synonym.+-%2F%0A%0A%0A%2F--+%60Hamming.toHamming%60+is+the+identity+function+to+the+%60Hamming%60+of+a+type.+-%2F%0A%40%5Bmatch_pattern%5D%0Adef+toHamming+%3A+%28%E2%88%80+i%2C+%CE%B2+i%29+%E2%89%83+Hamming+%CE%B2+%3A%3D%0A++Equiv.refl+_%0A%0A%2F--+%60Hamming.ofHamming%60+is+the+identity+function+from+the+%60Hamming%60+of+a+type.+-%2F%0A%40%5Bmatch_pattern%5D%0Adef+ofHamming+%3A+Hamming+%CE%B2+%E2%89%83+%E2%88%80+i%2C+%CE%B2+i+%3A%3D%0A++Equiv.refl+_%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_symm_eq+%3A+%28%40toHamming+_+%CE%B2%29.symm+%3D+ofHamming+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_symm_eq+%3A+%28%40ofHamming+_+%CE%B2%29.symm+%3D+toHamming+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_ofHamming+%28x+%3A+Hamming+%CE%B2%29+%3A+toHamming+%28ofHamming+x%29+%3D+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_toHamming+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+ofHamming+%28toHamming+x%29+%3D+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+toHamming_inj+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+toHamming+x+%3D+toHamming+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+ofHamming_inj+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A+ofHamming+x+%3D+ofHamming+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_zero+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+toHamming+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_zero+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+ofHamming+%280+%3A+Hamming+%CE%B2%29+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_neg+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+toHamming+%28-x%29+%3D+-toHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_neg+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%7Bx+%3A+Hamming+%CE%B2%7D+%3A+ofHamming+%28-x%29+%3D+-ofHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_add+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28x+%2B+y%29+%3D+toHamming+x+%2B+toHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_add+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28x+%2B+y%29+%3D+ofHamming+x+%2B+ofHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_sub+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28x+-+y%29+%3D+toHamming+x+-+toHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_sub+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28x+-+y%29+%3D+ofHamming+x+-+ofHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Br+%3A+%CE%B1%7D+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28r+%E2%80%A2+x%29+%3D+r+%E2%80%A2+toHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Br+%3A+%CE%B1%7D+%7Bx+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28r+%E2%80%A2+x%29+%3D+r+%E2%80%A2+ofHamming+x+%3A%3D+by+sorry%0A%0Asection%0A%0A%2F-%21+Instances+equipping+%60Hamming%60+with+%60hammingNorm%60+and+%60hammingDist%60.+-%2F%0A%0Avariable+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D%0A%0Ainstance+%3A+Dist+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+x+y+%3D%3E+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29%E2%9F%A9%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+dist_eq_hammingDist+%28x+y+%3A+Hamming+%CE%B2%29+%3A%0A++++dist+x+y+%3D+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Ainstance+%3A+PseudoMetricSpace+%28Hamming+%CE%B2%29+where%0A++dist_self+%3A%3D+by%0A++++sorry%0A++dist_comm+%3A%3D+by%0A++++sorry%0A++dist_triangle+%3A%3D+by%0A++++sorry%0A++toUniformSpace+%3A%3D+%E2%8A%A5%0A++uniformity_dist+%3A%3D+uniformity_dist_of_mem_uniformity+_+_+fun+s+%3D%3E+by%0A++++sorry%0A++toBornology+%3A%3D+sorry%0A++cobounded_sets+%3A%3D+by%0A++++sorry%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+nndist_eq_hammingDist+%28x+y+%3A+Hamming+%CE%B2%29+%3A%0A++++nndist+x+y+%3D+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29+%3A%3D+by+sorry%0A%0Ainstance+%3A+DiscreteTopology+%28Hamming+%CE%B2%29+%3A%3D+%E2%9F%A8rfl%E2%9F%A9%0A%0Ainstance+%3A+MetricSpace+%28Hamming+%CE%B2%29+%3A%3D+.ofT0PseudoMetricSpace+_%0A%0Ainstance+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+Norm+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+x+%3D%3E+hammingNorm+%28ofHamming+x%29%E2%9F%A9%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+norm_eq_hammingNorm+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%28x+%3A+Hamming+%CE%B2%29+%3A+%E2%80%96x%E2%80%96+%3D+hammingNorm+%28ofHamming+x%29+%3A%3D+by+sorry%0A%0Ainstance+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%3A+NormedAddGroup+%28Hamming+%CE%B2%29+where%0A++dist_eq+%3A%3D+by+push_cast%3B+exact+mod_cast+hammingDist_eq_hammingNorm%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommGroup+%28%CE%B2+i%29%5D+%3A+NormedAddCommGroup+%28Hamming+%CE%B2%29+where%0A++dist_eq+%3A%3D+by+push_cast%3B+exact+mod_cast+hammingDist_eq_hammingNorm%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+nnnorm_eq_hammingNorm+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%28x+%3A+Hamming+%CE%B2%29+%3A%0A++++%E2%80%96x%E2%80%96%E2%82%8A+%3D+hammingNorm+%28ofHamming+x%29+%3A%3D+by+sorry%0A%0Aend%0A%0Aend+Hamming%0A%0Aend+AgoraInformationTheory%0A&project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2&ephemeral=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34216 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55020 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:43884 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:37858 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:42484 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51166 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55918 - "GET /projects HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55932 - "GET /target_content?target_id=99342d3d-5d89-4746-91fd-60ea3946b6f2%3AInformationTheory%2FHamming.lean%3AAgoraInformationTheory.hammingDist_triangle_right HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50138 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55932 - "GET /projects?agent_id=0ee84a49-4238-4418-b7c0-9d3e1a8b802b HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55932 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:55932 - "GET /repo_files?project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:54274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     172.25.0.7:55932 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:54274 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_status HTTP/1.1" 200 OK
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:55932 - "GET /library_file?file_name=InformationTheory%2FHamming.lean&project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.8:57218 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48780 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49308 - "GET /health HTTP/1.1" 200 OK
+
+[RepoQueue] + Adding request #2: InformationTheory.Hamming
+[RepoQueue]    Request ID: 6cec5ac9...
+[RepoQueue]    Ephemeral: False
+[RepoQueue]    Dependencies: (none)
+[RepoQueue] Invalidated completion of 86e1b5f9-0f27-46df-8f33-9bc645ffa2e5 for modification of InformationTheory.Hamming
+
+[RepoQueue] >> 1 request(s) became ready:
+  + InformationTheory.Hamming (all dependencies satisfied)
+
+================================================================================
+[QUEUE STATE] Project: 99342d3d-5d89-4746-91fd-60ea3946b6f2
+================================================================================
+
+[INPUT ORDER] Requests received in this order:
+  1. v [completed ] InformationTheory.Hamming (id: 86e1b5f9...)
+  2. + [ready     ] InformationTheory.Hamming (id: 6cec5ac9...)
+
+[DEPENDENCY TREE]
+
+  Independent modules (can run in parallel):
+    * InformationTheory.Hamming [completed]
+
+[PARALLEL EXECUTION OPPORTUNITIES]
+  Ready to execute (1 in queue):
+
+[EXECUTION WAVES] If all started now:
+  Wave 1 (parallel): InformationTheory.Hamming
+================================================================================
+
+[ExecutionEngine] Submitted request 6cec5ac9-e1eb-443e-ba68-19c91a1e02fb for InformationTheory.Hamming
+[RepoQueue] > Started execution: InformationTheory.Hamming
+[Worker 0] Processing request 6cec5ac9-e1eb-443e-ba68-19c91a1e02fb: InformationTheory.Hamming
+[RepoManager] Cache hit for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterface] add_contribution: name=InformationTheory/Hamming.lean, file_exists=True
+[LeanInterface] Running get_targets: lake exe get_targets --submission=12492 --target=InformationTheory/Hamming.lean
+[LeanInterface] Updated InformationTheory.lean with 3 imports
+[LeanInterface] Running lake build for module: InformationTheory.Hamming
+[LeanInterface] Lake build InformationTheory.Hamming completed with return code 0
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self is satisfied
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right is satisfied
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[AGORA_LOG] Logged: Modified InformationTheory/Hamming.lean
+[LeanInterface] Committed and pushed: [Agora] Modified: InformationTheory/Hamming.lean
+[LeanInterface] Contribution added successfully: InformationTheory/Hamming.lean
+
+[RepoQueue] v Completed: InformationTheory.Hamming (ephemeral=False)
+
+[RepoQueue] Queue state after completing InformationTheory.Hamming:
+
+================================================================================
+[QUEUE STATE] Project: 99342d3d-5d89-4746-91fd-60ea3946b6f2
+================================================================================
+
+[INPUT ORDER] Requests received in this order:
+  1. v [completed ] InformationTheory.Hamming (id: 86e1b5f9...)
+  2. v [completed ] InformationTheory.Hamming (id: 6cec5ac9...)
+
+[DEPENDENCY TREE]
+
+  Independent modules (can run in parallel):
+    * InformationTheory.Hamming [completed]
+
+[PARALLEL EXECUTION OPPORTUNITIES]
+  (none - waiting for dependencies or all complete)
+
+[EXECUTION WAVES] If all started now:
+  Wave 1 (parallel): InformationTheory.Hamming
+================================================================================
+
+[Worker 0] Completed request 6cec5ac9-e1eb-443e-ba68-19c91a1e02fb
+INFO:     172.25.0.7:59860 - "POST /add_contribution?name=InformationTheory%2FHamming.lean&file_content=import+VerifiedAgora.tagger%0A%2F-%0ACopyright+%28c%29+2022+Wrenna+Robson.+All+rights+reserved.%0AReleased+under+Apache+2.0+license+as+described+in+the+file+LICENSE.%0AAuthors%3A+Wrenna+Robson%0A-%2F%0Aimport+Mathlib.Analysis.Normed.Group.Basic%0A%0A%2F-%21%0A%23+Hamming+spaces%0A%0AThe+Hamming+metric+counts+the+number+of+places+two+members+of+a+%28finite%29+Pi+type%0Adiffer.+The+Hamming+norm+is+the+same+as+the+Hamming+metric+over+additive+groups%2C+and%0Acounts+the+number+of+places+a+member+of+a+%28finite%29+Pi+type+differs+from+zero.%0A%0AThis+is+a+useful+notion+in+various+applications%2C+but+in+particular+it+is+relevant%0Ain+coding+theory%2C+in+which+it+is+fundamental+for+defining+the+minimum+distance+of+a%0Acode.%0A%0A%23%23+Main+definitions%0A%2A+%60hammingDist+x+y%60%3A+the+Hamming+distance+between+%60x%60+and+%60y%60%2C+the+number+of+entries+which+differ.%0A%2A+%60hammingNorm+x%60%3A+the+Hamming+norm+of+%60x%60%2C+the+number+of+non-zero+entries.%0A%2A+%60Hamming+%CE%B2%60%3A+a+type+synonym+for+%60%CE%A0+i%2C+%CE%B2+i%60+with+%60dist%60+and+%60norm%60+provided+by+the+above.%0A%2A+%60Hamming.toHamming%60%2C+%60Hamming.ofHamming%60%3A+functions+for+casting+between+%60Hamming+%CE%B2%60+and%0A%60%CE%A0+i%2C+%CE%B2+i%60.%0A%2A+the+Hamming+norm+forms+a+normed+group+on+%60Hamming+%CE%B2%60.%0A-%2F%0A%0Anamespace+AgoraInformationTheory%0A%0Asection+HammingDistNorm%0A%0Aopen+Finset+Function%0A%0Avariable+%7B%CE%B1+%CE%B9+%3A+Type%2A%7D+%7B%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%7D+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D%0Avariable+%7B%CE%B3+%3A+%CE%B9+%E2%86%92+Type%2A%7D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B3+i%29%5D%0A%0A%2F--+The+Hamming+distance+function+to+the+naturals.+-%2F%0Adef+hammingDist+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+%E2%84%95+%3A%3D+%23%7Bi+%7C+x+i+%E2%89%A0+y+i%7D%0A%0A%2F--+Corresponds+to+%60dist_self%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_self+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+x+%3D+0+%3A%3D+by+simp+%5BhammingDist%5D%0A%0A%2F--+Corresponds+to+%60dist_nonneg%60.+-%2F%0Atheorem+hammingDist_nonneg+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%E2%89%A4+hammingDist+x+y+%3A%3D%0A++zero_le+_%0A%0A%2F--+Corresponds+to+%60dist_comm%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_comm+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+y+%3D+hammingDist+y+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+z+%E2%89%A4+hammingDist+x+y+%2B+hammingDist+y+z+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle_left%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle_left+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%E2%89%A4+hammingDist+z+x+%2B+hammingDist+z+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle_right%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle_right+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%E2%89%A4+hammingDist+x+z+%2B+hammingDist+y+z+%3A%3D+by%0A++rw+%5BhammingDist_comm+y%5D%0A++exact+hammingDist_triangle+_+_+_%0A%0A%2F--+Corresponds+to+%60swap_dist%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+swap_hammingDist+%3A+swap+%28%40hammingDist+_+%CE%B2+_+_%29+%3D+hammingDist+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60eq_of_dist_eq_zero%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+eq_of_hammingDist_eq_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3D+0+%E2%86%92+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_eq_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_eq_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3D+0+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60zero_eq_dist%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hamming_zero_eq_dist+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3D+hammingDist+x+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_ne_zero%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_ne_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%E2%89%A0+0+%E2%86%94+x+%E2%89%A0+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_pos%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_pos+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3C+hammingDist+x+y+%E2%86%94+x+%E2%89%A0+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_lt_one+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3C+1+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_le_card_fintype+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%E2%89%A4+Fintype.card+%CE%B9+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_comp_le_hammingDist+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%3A%0A++++%28hammingDist+%28fun+i+%3D%3E+f+i+%28x+i%29%29+fun+i+%3D%3E+f+i+%28y+i%29%29+%E2%89%A4+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_comp+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf+%3A+%E2%88%80+i%2C+Injective+%28f+i%29%29+%3A%0A++++%28hammingDist+%28fun+i+%3D%3E+f+i+%28x+i%29%29+fun+i+%3D%3E+f+i+%28y+i%29%29+%3D+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_smul_le_hammingDist+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++hammingDist+%28k+%E2%80%A2+x%29+%28k+%E2%80%A2+y%29+%E2%89%A4+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_smul%60+with+the+discrete+norm+on+%60%CE%B1%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D%0A++++%28hk+%3A+%E2%88%80+i%2C+IsSMulRegular+%28%CE%B2+i%29+k%29+%3A+hammingDist+%28k+%E2%80%A2+x%29+%28k+%E2%80%A2+y%29+%3D+hammingDist+x+y+%3A%3D+by+sorry%0A%0Asection+Zero%0A%0Avariable+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+Zero+%28%CE%B3+i%29%5D%0A%0A%2F--+The+Hamming+weight+function+to+the+naturals.+-%2F%0Adef+hammingNorm+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+%E2%84%95+%3A%3D+%23%7Bi+%7C+x+i+%E2%89%A0+0%7D%0A%0A%2F--+Corresponds+to+%60dist_zero_right%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_zero_right+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+0+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_zero_left%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_zero_left+%3A+hammingDist+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+hammingNorm+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_nonneg%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingNorm_nonneg+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_zero+%3A+hammingNorm+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_eq_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_eq_zero+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%3D+0+%E2%86%94+x+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_ne_zero_iff%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingNorm_ne_zero_iff+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%E2%89%A0+0+%E2%86%94+x+%E2%89%A0+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_pos_iff%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_pos_iff+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3C+hammingNorm+x+%E2%86%94+x+%E2%89%A0+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_lt_one+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%3C+1+%E2%86%94+x+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_le_card_fintype+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%E2%89%A4+Fintype.card+%CE%B9+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_comp_le_hammingNorm+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf+%3A+%E2%88%80+i%2C+f+i+0+%3D+0%29+%3A%0A++++%28hammingNorm+fun+i+%3D%3E+f+i+%28x+i%29%29+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_comp+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf%E2%82%81+%3A+%E2%88%80+i%2C+Injective+%28f+i%29%29%0A++++%28hf%E2%82%82+%3A+%E2%88%80+i%2C+f+i+0+%3D+0%29+%3A+%28hammingNorm+fun+i+%3D%3E+f+i+%28x+i%29%29+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_smul_le_hammingNorm+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D%0A++++%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+%28k+%E2%80%A2+x%29+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_smul+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D%0A++++%28hk+%3A+%E2%88%80+i%2C+IsSMulRegular+%28%CE%B2+i%29+k%29+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingNorm+%28k+%E2%80%A2+x%29+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0Aend+Zero%0A%0A%2F--+Corresponds+to+%60dist_eq_norm%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_eq_hammingNorm+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%3D+hammingNorm+%28x+-+y%29+%3A%3D+by+sorry%0A%0Aend+HammingDistNorm%0A%0A%2F-%21+%23%23%23+The+%60Hamming%60+type+synonym+-%2F%0A%0A%0A%2F--+Type+synonym+for+a+Pi+type+which+inherits+the+usual+algebraic+instances%2C+but+is+equipped+with%0Athe+Hamming+metric+and+norm%2C+instead+of+%60Pi.normedAddCommGroup%60+which+uses+the+sup+norm.+-%2F%0Adef+Hamming+%7B%CE%B9+%3A+Type%2A%7D+%28%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%29+%3A+Type+_+%3A%3D%0A++%E2%88%80+i%2C+%CE%B2+i%0A%0Anamespace+Hamming%0A%0Avariable+%7B%CE%B1+%CE%B9+%3A+Type%2A%7D+%7B%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%7D%0A%0A%2F-%21+Instances+inherited+from+normal+Pi+types.+-%2F%0A%0Ainstance+%5B%E2%88%80+i%2C+Inhabited+%28%CE%B2+i%29%5D+%3A+Inhabited+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+_+%3D%3E+default%E2%9F%A9%0A%0Ainstance+%5BDecidableEq+%CE%B9%5D+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+Fintype+%28%CE%B2+i%29%5D+%3A+Fintype+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instFintype%0A%0Ainstance+%5BInhabited+%CE%B9%5D+%5B%E2%88%80+i%2C+Nonempty+%28%CE%B2+i%29%5D+%5BNontrivial+%28%CE%B2+default%29%5D+%3A+Nontrivial+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.nontrivial%0A%0Ainstance+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D+%3A+DecidableEq+%28Hamming+%CE%B2%29+%3A%3D%0A++Fintype.decidablePiFintype%0A%0Ainstance+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+Zero+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instZero%0A%0Ainstance+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%3A+Neg+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instNeg%0A%0Ainstance+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%3A+Add+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instAdd%0A%0Ainstance+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%3A+Sub+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instSub%0A%0Ainstance+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%3A+SMul+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instSMul%0A%0Ainstance+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%3A+SMulWithZero+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.smulWithZero+_%0A%0Ainstance+%5B%E2%88%80+i%2C+AddMonoid+%28%CE%B2+i%29%5D+%3A+AddMonoid+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addMonoid%0A%0Ainstance+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%3A+AddGroup+%28Hamming+%CE%B2%29+%3A%3D+Pi.addGroup%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommMonoid+%28%CE%B2+i%29%5D+%3A+AddCommMonoid+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addCommMonoid%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommGroup+%28%CE%B2+i%29%5D+%3A+AddCommGroup+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addCommGroup%0A%0Ainstance+%28%CE%B1%29+%5BSemiring+%CE%B1%5D+%28%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%29+%5B%E2%88%80+i%2C+AddCommMonoid+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+Module+%CE%B1+%28%CE%B2+i%29%5D+%3A%0A++++Module+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.module+_+_+_%0A%0A%2F-%21+API+to%2Ffrom+the+type+synonym.+-%2F%0A%0A%0A%2F--+%60Hamming.toHamming%60+is+the+identity+function+to+the+%60Hamming%60+of+a+type.+-%2F%0A%40%5Bmatch_pattern%5D%0Adef+toHamming+%3A+%28%E2%88%80+i%2C+%CE%B2+i%29+%E2%89%83+Hamming+%CE%B2+%3A%3D%0A++Equiv.refl+_%0A%0A%2F--+%60Hamming.ofHamming%60+is+the+identity+function+from+the+%60Hamming%60+of+a+type.+-%2F%0A%40%5Bmatch_pattern%5D%0Adef+ofHamming+%3A+Hamming+%CE%B2+%E2%89%83+%E2%88%80+i%2C+%CE%B2+i+%3A%3D%0A++Equiv.refl+_%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_symm_eq+%3A+%28%40toHamming+_+%CE%B2%29.symm+%3D+ofHamming+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_symm_eq+%3A+%28%40ofHamming+_+%CE%B2%29.symm+%3D+toHamming+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_ofHamming+%28x+%3A+Hamming+%CE%B2%29+%3A+toHamming+%28ofHamming+x%29+%3D+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_toHamming+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+ofHamming+%28toHamming+x%29+%3D+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+toHamming_inj+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+toHamming+x+%3D+toHamming+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+ofHamming_inj+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A+ofHamming+x+%3D+ofHamming+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_zero+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+toHamming+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_zero+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+ofHamming+%280+%3A+Hamming+%CE%B2%29+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_neg+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+toHamming+%28-x%29+%3D+-toHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_neg+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%7Bx+%3A+Hamming+%CE%B2%7D+%3A+ofHamming+%28-x%29+%3D+-ofHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_add+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28x+%2B+y%29+%3D+toHamming+x+%2B+toHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_add+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28x+%2B+y%29+%3D+ofHamming+x+%2B+ofHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_sub+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28x+-+y%29+%3D+toHamming+x+-+toHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_sub+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28x+-+y%29+%3D+ofHamming+x+-+ofHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Br+%3A+%CE%B1%7D+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28r+%E2%80%A2+x%29+%3D+r+%E2%80%A2+toHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Br+%3A+%CE%B1%7D+%7Bx+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28r+%E2%80%A2+x%29+%3D+r+%E2%80%A2+ofHamming+x+%3A%3D+by+sorry%0A%0Asection%0A%0A%2F-%21+Instances+equipping+%60Hamming%60+with+%60hammingNorm%60+and+%60hammingDist%60.+-%2F%0A%0Avariable+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D%0A%0Ainstance+%3A+Dist+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+x+y+%3D%3E+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29%E2%9F%A9%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+dist_eq_hammingDist+%28x+y+%3A+Hamming+%CE%B2%29+%3A%0A++++dist+x+y+%3D+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Ainstance+%3A+PseudoMetricSpace+%28Hamming+%CE%B2%29+where%0A++dist_self+%3A%3D+by%0A++++sorry%0A++dist_comm+%3A%3D+by%0A++++sorry%0A++dist_triangle+%3A%3D+by%0A++++sorry%0A++toUniformSpace+%3A%3D+%E2%8A%A5%0A++uniformity_dist+%3A%3D+uniformity_dist_of_mem_uniformity+_+_+fun+s+%3D%3E+by%0A++++sorry%0A++toBornology+%3A%3D+sorry%0A++cobounded_sets+%3A%3D+by%0A++++sorry%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+nndist_eq_hammingDist+%28x+y+%3A+Hamming+%CE%B2%29+%3A%0A++++nndist+x+y+%3D+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29+%3A%3D+by+sorry%0A%0Ainstance+%3A+DiscreteTopology+%28Hamming+%CE%B2%29+%3A%3D+%E2%9F%A8rfl%E2%9F%A9%0A%0Ainstance+%3A+MetricSpace+%28Hamming+%CE%B2%29+%3A%3D+.ofT0PseudoMetricSpace+_%0A%0Ainstance+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+Norm+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+x+%3D%3E+hammingNorm+%28ofHamming+x%29%E2%9F%A9%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+norm_eq_hammingNorm+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%28x+%3A+Hamming+%CE%B2%29+%3A+%E2%80%96x%E2%80%96+%3D+hammingNorm+%28ofHamming+x%29+%3A%3D+by+sorry%0A%0Ainstance+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%3A+NormedAddGroup+%28Hamming+%CE%B2%29+where%0A++dist_eq+%3A%3D+by+push_cast%3B+exact+mod_cast+hammingDist_eq_hammingNorm%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommGroup+%28%CE%B2+i%29%5D+%3A+NormedAddCommGroup+%28Hamming+%CE%B2%29+where%0A++dist_eq+%3A%3D+by+push_cast%3B+exact+mod_cast+hammingDist_eq_hammingNorm%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+nnnorm_eq_hammingNorm+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%28x+%3A+Hamming+%CE%B2%29+%3A%0A++++%E2%80%96x%E2%80%96%E2%82%8A+%3D+hammingNorm+%28ofHamming+x%29+%3A%3D+by+sorry%0A%0Aend%0A%0Aend+Hamming%0A%0Aend+AgoraInformationTheory%0A&project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2&ephemeral=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50824 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:35668 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:39298 - "GET /projects?agent_id=0ee84a49-4238-4418-b7c0-9d3e1a8b802b HTTP/1.1" 200 OK
+INFO:     172.25.0.7:39298 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:39298 - "GET /repo_files?project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:39310 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_logs HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60816 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:39298 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.7:39310 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2/build_status HTTP/1.1" 200 OK
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+INFO:     172.25.0.7:39298 - "GET /library_file?file_name=InformationTheory%2FHamming.lean&project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     172.25.0.8:33776 - "GET /projects/99342d3d-5d89-4746-91fd-60ea3946b6f2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57170 - "GET /health HTTP/1.1" 200 OK
+
+[RepoQueue] + Adding request #3: InformationTheory.Hamming
+[RepoQueue]    Request ID: c253ef79...
+[RepoQueue]    Ephemeral: False
+[RepoQueue]    Dependencies: (none)
+[RepoQueue] Invalidated completion of 6cec5ac9-e1eb-443e-ba68-19c91a1e02fb for modification of InformationTheory.Hamming
+
+[RepoQueue] >> 1 request(s) became ready:
+  + InformationTheory.Hamming (all dependencies satisfied)
+
+================================================================================
+[QUEUE STATE] Project: 99342d3d-5d89-4746-91fd-60ea3946b6f2
+================================================================================
+
+[INPUT ORDER] Requests received in this order:
+  1. v [completed ] InformationTheory.Hamming (id: 86e1b5f9...)
+  2. v [completed ] InformationTheory.Hamming (id: 6cec5ac9...)
+  3. + [ready     ] InformationTheory.Hamming (id: c253ef79...)
+
+[DEPENDENCY TREE]
+
+  Independent modules (can run in parallel):
+    * InformationTheory.Hamming [completed]
+
+[PARALLEL EXECUTION OPPORTUNITIES]
+  Ready to execute (1 in queue):
+
+[EXECUTION WAVES] If all started now:
+  Wave 1 (parallel): InformationTheory.Hamming
+================================================================================
+
+[ExecutionEngine] Submitted request c253ef79-0224-40ec-a58e-486df3f81879 for InformationTheory.Hamming
+[RepoQueue] > Started execution: InformationTheory.Hamming
+[Worker 0] Processing request c253ef79-0224-40ec-a58e-486df3f81879: InformationTheory.Hamming
+[RepoManager] Cache hit for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterfaceRegistry] Reusing interface for project 99342d3d-5d89-4746-91fd-60ea3946b6f2
+[LeanInterface] add_contribution: name=InformationTheory/Hamming.lean, file_exists=True
+[LeanInterface] Running get_targets: lake exe get_targets --submission=12479 --target=InformationTheory/Hamming.lean
+[LeanInterface] Updated InformationTheory.lean with 3 imports
+[LeanInterface] Running lake build for module: InformationTheory.Hamming
+[LeanInterface] Lake build InformationTheory.Hamming completed with return code 0
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_self is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_triangle_right is satisfied
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.swap_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.eq_of_hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hamming_zero_eq_dist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_ne_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_pos is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul_le_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_right is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_zero_left is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_nonneg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_eq_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_ne_zero_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_pos_iff is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_lt_one is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_le_card_fintype is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_comp is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul_le_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingNorm_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.hammingDist_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_symm_eq is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_ofHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_toHamming is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_inj is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_zero is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_neg is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_add is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_sub is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.toHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.ofHamming_smul is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.dist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.instPseudoMetricSpace is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nndist_eq_hammingDist is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.norm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[LeanInterface DEBUG] Found target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm
+[LeanInterface DEBUG] Target 99342d3d-5d89-4746-91fd-60ea3946b6f2:InformationTheory/Hamming.lean:AgoraInformationTheory.Hamming.nnnorm_eq_hammingNorm is unsatisfied (has errors/warnings)
+[AGORA_LOG] Logged: Modified InformationTheory/Hamming.lean
+[LeanInterface] Committed and pushed: [Agora] Modified: InformationTheory/Hamming.lean
+[LeanInterface] Contribution added successfully: InformationTheory/Hamming.lean
+
+[RepoQueue] v Completed: InformationTheory.Hamming (ephemeral=False)
+
+[RepoQueue] Queue state after completing InformationTheory.Hamming:
+
+================================================================================
+[QUEUE STATE] Project: 99342d3d-5d89-4746-91fd-60ea3946b6f2
+================================================================================
+
+[INPUT ORDER] Requests received in this order:
+  1. v [completed ] InformationTheory.Hamming (id: 86e1b5f9...)
+  2. v [completed ] InformationTheory.Hamming (id: 6cec5ac9...)
+  3. v [completed ] InformationTheory.Hamming (id: c253ef79...)
+
+[DEPENDENCY TREE]
+
+  Independent modules (can run in parallel):
+    * InformationTheory.Hamming [completed]
+
+[PARALLEL EXECUTION OPPORTUNITIES]
+  (none - waiting for dependencies or all complete)
+
+[EXECUTION WAVES] If all started now:
+  Wave 1 (parallel): InformationTheory.Hamming
+================================================================================
+
+[Worker 0] Completed request c253ef79-0224-40ec-a58e-486df3f81879
+INFO:     172.25.0.7:53790 - "POST /add_contribution?name=InformationTheory%2FHamming.lean&file_content=import+VerifiedAgora.tagger%0A%2F-%0ACopyright+%28c%29+2022+Wrenna+Robson.+All+rights+reserved.%0AReleased+under+Apache+2.0+license+as+described+in+the+file+LICENSE.%0AAuthors%3A+Wrenna+Robson%0A-%2F%0Aimport+Mathlib.Analysis.Normed.Group.Basic%0A%0A%2F-%21%0A%23+Hamming+spaces%0A%0AThe+Hamming+metric+counts+the+number+of+places+two+members+of+a+%28finite%29+Pi+type%0Adiffer.+The+Hamming+norm+is+the+same+as+the+Hamming+metric+over+additive+groups%2C+and%0Acounts+the+number+of+places+a+member+of+a+%28finite%29+Pi+type+differs+from+zero.%0A%0AThis+is+a+useful+notion+in+various+applications%2C+but+in+particular+it+is+relevant%0Ain+coding+theory%2C+in+which+it+is+fundamental+for+defining+the+minimum+distance+of+a%0Acode.%0A%0A%23%23+Main+definitions%0A%2A+%60hammingDist+x+y%60%3A+the+Hamming+distance+between+%60x%60+and+%60y%60%2C+the+number+of+entries+which+differ.%0A%2A+%60hammingNorm+x%60%3A+the+Hamming+norm+of+%60x%60%2C+the+number+of+non-zero+entries.%0A%2A+%60Hamming+%CE%B2%60%3A+a+type+synonym+for+%60%CE%A0+i%2C+%CE%B2+i%60+with+%60dist%60+and+%60norm%60+provided+by+the+above.%0A%2A+%60Hamming.toHamming%60%2C+%60Hamming.ofHamming%60%3A+functions+for+casting+between+%60Hamming+%CE%B2%60+and%0A%60%CE%A0+i%2C+%CE%B2+i%60.%0A%2A+the+Hamming+norm+forms+a+normed+group+on+%60Hamming+%CE%B2%60.%0A-%2F%0A%0Anamespace+AgoraInformationTheory%0A%0Asection+HammingDistNorm%0A%0Aopen+Finset+Function%0A%0Avariable+%7B%CE%B1+%CE%B9+%3A+Type%2A%7D+%7B%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%7D+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D%0Avariable+%7B%CE%B3+%3A+%CE%B9+%E2%86%92+Type%2A%7D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B3+i%29%5D%0A%0A%2F--+The+Hamming+distance+function+to+the+naturals.+-%2F%0Adef+hammingDist+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+%E2%84%95+%3A%3D+%23%7Bi+%7C+x+i+%E2%89%A0+y+i%7D%0A%0A%2F--+Corresponds+to+%60dist_self%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_self+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+x+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_nonneg%60.+-%2F%0Atheorem+hammingDist_nonneg+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%E2%89%A4+hammingDist+x+y+%3A%3D%0A++zero_le+_%0A%0A%2F--+Corresponds+to+%60dist_comm%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_comm+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+y+%3D+hammingDist+y+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+z+%E2%89%A4+hammingDist+x+y+%2B+hammingDist+y+z+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle_left%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle_left+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%E2%89%A4+hammingDist+z+x+%2B+hammingDist+z+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_triangle_right%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_triangle_right+%28x+y+z+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%E2%89%A4+hammingDist+x+z+%2B+hammingDist+y+z+%3A%3D+by%0A++rw+%5BhammingDist_comm+y%5D%0A++exact+hammingDist_triangle+_+_+_%0A%0A%2F--+Corresponds+to+%60swap_dist%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+swap_hammingDist+%3A+swap+%28%40hammingDist+_+%CE%B2+_+_%29+%3D+hammingDist+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60eq_of_dist_eq_zero%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+eq_of_hammingDist_eq_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3D+0+%E2%86%92+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_eq_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_eq_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3D+0+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60zero_eq_dist%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hamming_zero_eq_dist+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3D+hammingDist+x+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_ne_zero%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_ne_zero+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%E2%89%A0+0+%E2%86%94+x+%E2%89%A0+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_pos%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_pos+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3C+hammingDist+x+y+%E2%86%94+x+%E2%89%A0+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_lt_one+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%3C+1+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_le_card_fintype+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingDist+x+y+%E2%89%A4+Fintype.card+%CE%B9+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_comp_le_hammingDist+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%3A%0A++++%28hammingDist+%28fun+i+%3D%3E+f+i+%28x+i%29%29+fun+i+%3D%3E+f+i+%28y+i%29%29+%E2%89%A4+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_comp+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf+%3A+%E2%88%80+i%2C+Injective+%28f+i%29%29+%3A%0A++++%28hammingDist+%28fun+i+%3D%3E+f+i+%28x+i%29%29+fun+i+%3D%3E+f+i+%28y+i%29%29+%3D+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingDist_smul_le_hammingDist+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++hammingDist+%28k+%E2%80%A2+x%29+%28k+%E2%80%A2+y%29+%E2%89%A4+hammingDist+x+y+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_smul%60+with+the+discrete+norm+on+%60%CE%B1%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D%0A++++%28hk+%3A+%E2%88%80+i%2C+IsSMulRegular+%28%CE%B2+i%29+k%29+%3A+hammingDist+%28k+%E2%80%A2+x%29+%28k+%E2%80%A2+y%29+%3D+hammingDist+x+y+%3A%3D+by+sorry%0A%0Asection+Zero%0A%0Avariable+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+Zero+%28%CE%B3+i%29%5D%0A%0A%2F--+The+Hamming+weight+function+to+the+naturals.+-%2F%0Adef+hammingNorm+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+%E2%84%95+%3A%3D+%23%7Bi+%7C+x+i+%E2%89%A0+0%7D%0A%0A%2F--+Corresponds+to+%60dist_zero_right%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_zero_right+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingDist+x+0+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60dist_zero_left%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingDist_zero_left+%3A+hammingDist+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+hammingNorm+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_nonneg%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingNorm_nonneg+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_zero+%3A+hammingNorm+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_eq_zero%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_eq_zero+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%3D+0+%E2%86%94+x+%3D+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_ne_zero_iff%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingNorm_ne_zero_iff+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%E2%89%A0+0+%E2%86%94+x+%E2%89%A0+0+%3A%3D+by+sorry%0A%0A%2F--+Corresponds+to+%60norm_pos_iff%60.+-%2F%0A%40%5Btarget%2C+simp%5D%0Atheorem+hammingNorm_pos_iff+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+0+%3C+hammingNorm+x+%E2%86%94+x+%E2%89%A0+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_lt_one+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%3C+1+%E2%86%94+x+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_le_card_fintype+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+x+%E2%89%A4+Fintype.card+%CE%B9+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_comp_le_hammingNorm+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf+%3A+%E2%88%80+i%2C+f+i+0+%3D+0%29+%3A%0A++++%28hammingNorm+fun+i+%3D%3E+f+i+%28x+i%29%29+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_comp+%28f+%3A+%E2%88%80+i%2C+%CE%B3+i+%E2%86%92+%CE%B2+i%29+%7Bx+%3A+%E2%88%80+i%2C+%CE%B3+i%7D+%28hf%E2%82%81+%3A+%E2%88%80+i%2C+Injective+%28f+i%29%29%0A++++%28hf%E2%82%82+%3A+%E2%88%80+i%2C+f+i+0+%3D+0%29+%3A+%28hammingNorm+fun+i+%3D%3E+f+i+%28x+i%29%29+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_smul_le_hammingNorm+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D%0A++++%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+hammingNorm+%28k+%E2%80%A2+x%29+%E2%89%A4+hammingNorm+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+hammingNorm_smul+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%7Bk+%3A+%CE%B1%7D%0A++++%28hk+%3A+%E2%88%80+i%2C+IsSMulRegular+%28%CE%B2+i%29+k%29+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+hammingNorm+%28k+%E2%80%A2+x%29+%3D+hammingNorm+x+%3A%3D+by+sorry%0A%0Aend+Zero%0A%0A%2F--+Corresponds+to+%60dist_eq_norm%60.+-%2F%0A%40%5Btarget%5D%0Atheorem+hammingDist_eq_hammingNorm+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%28x+y+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A%0A++++hammingDist+x+y+%3D+hammingNorm+%28x+-+y%29+%3A%3D+by+sorry%0A%0Aend+HammingDistNorm%0A%0A%2F-%21+%23%23%23+The+%60Hamming%60+type+synonym+-%2F%0A%0A%0A%2F--+Type+synonym+for+a+Pi+type+which+inherits+the+usual+algebraic+instances%2C+but+is+equipped+with%0Athe+Hamming+metric+and+norm%2C+instead+of+%60Pi.normedAddCommGroup%60+which+uses+the+sup+norm.+-%2F%0Adef+Hamming+%7B%CE%B9+%3A+Type%2A%7D+%28%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%29+%3A+Type+_+%3A%3D%0A++%E2%88%80+i%2C+%CE%B2+i%0A%0Anamespace+Hamming%0A%0Avariable+%7B%CE%B1+%CE%B9+%3A+Type%2A%7D+%7B%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%7D%0A%0A%2F-%21+Instances+inherited+from+normal+Pi+types.+-%2F%0A%0Ainstance+%5B%E2%88%80+i%2C+Inhabited+%28%CE%B2+i%29%5D+%3A+Inhabited+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+_+%3D%3E+default%E2%9F%A9%0A%0Ainstance+%5BDecidableEq+%CE%B9%5D+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+Fintype+%28%CE%B2+i%29%5D+%3A+Fintype+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instFintype%0A%0Ainstance+%5BInhabited+%CE%B9%5D+%5B%E2%88%80+i%2C+Nonempty+%28%CE%B2+i%29%5D+%5BNontrivial+%28%CE%B2+default%29%5D+%3A+Nontrivial+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.nontrivial%0A%0Ainstance+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D+%3A+DecidableEq+%28Hamming+%CE%B2%29+%3A%3D%0A++Fintype.decidablePiFintype%0A%0Ainstance+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+Zero+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instZero%0A%0Ainstance+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%3A+Neg+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instNeg%0A%0Ainstance+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%3A+Add+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instAdd%0A%0Ainstance+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%3A+Sub+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instSub%0A%0Ainstance+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%3A+SMul+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.instSMul%0A%0Ainstance+%5BZero+%CE%B1%5D+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+SMulWithZero+%CE%B1+%28%CE%B2+i%29%5D+%3A+SMulWithZero+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.smulWithZero+_%0A%0Ainstance+%5B%E2%88%80+i%2C+AddMonoid+%28%CE%B2+i%29%5D+%3A+AddMonoid+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addMonoid%0A%0Ainstance+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%3A+AddGroup+%28Hamming+%CE%B2%29+%3A%3D+Pi.addGroup%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommMonoid+%28%CE%B2+i%29%5D+%3A+AddCommMonoid+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addCommMonoid%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommGroup+%28%CE%B2+i%29%5D+%3A+AddCommGroup+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.addCommGroup%0A%0Ainstance+%28%CE%B1%29+%5BSemiring+%CE%B1%5D+%28%CE%B2+%3A+%CE%B9+%E2%86%92+Type%2A%29+%5B%E2%88%80+i%2C+AddCommMonoid+%28%CE%B2+i%29%5D+%5B%E2%88%80+i%2C+Module+%CE%B1+%28%CE%B2+i%29%5D+%3A%0A++++Module+%CE%B1+%28Hamming+%CE%B2%29+%3A%3D%0A++Pi.module+_+_+_%0A%0A%2F-%21+API+to%2Ffrom+the+type+synonym.+-%2F%0A%0A%0A%2F--+%60Hamming.toHamming%60+is+the+identity+function+to+the+%60Hamming%60+of+a+type.+-%2F%0A%40%5Bmatch_pattern%5D%0Adef+toHamming+%3A+%28%E2%88%80+i%2C+%CE%B2+i%29+%E2%89%83+Hamming+%CE%B2+%3A%3D%0A++Equiv.refl+_%0A%0A%2F--+%60Hamming.ofHamming%60+is+the+identity+function+from+the+%60Hamming%60+of+a+type.+-%2F%0A%40%5Bmatch_pattern%5D%0Adef+ofHamming+%3A+Hamming+%CE%B2+%E2%89%83+%E2%88%80+i%2C+%CE%B2+i+%3A%3D%0A++Equiv.refl+_%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_symm_eq+%3A+%28%40toHamming+_+%CE%B2%29.symm+%3D+ofHamming+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_symm_eq+%3A+%28%40ofHamming+_+%CE%B2%29.symm+%3D+toHamming+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_ofHamming+%28x+%3A+Hamming+%CE%B2%29+%3A+toHamming+%28ofHamming+x%29+%3D+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_toHamming+%28x+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3A+ofHamming+%28toHamming+x%29+%3D+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+toHamming_inj+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+toHamming+x+%3D+toHamming+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Atheorem+ofHamming_inj+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A+ofHamming+x+%3D+ofHamming+y+%E2%86%94+x+%3D+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_zero+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+toHamming+%280+%3A+%E2%88%80+i%2C+%CE%B2+i%29+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_zero+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+ofHamming+%280+%3A+Hamming+%CE%B2%29+%3D+0+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_neg+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A+toHamming+%28-x%29+%3D+-toHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_neg+%5B%E2%88%80+i%2C+Neg+%28%CE%B2+i%29%5D+%7Bx+%3A+Hamming+%CE%B2%7D+%3A+ofHamming+%28-x%29+%3D+-ofHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_add+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28x+%2B+y%29+%3D+toHamming+x+%2B+toHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_add+%5B%E2%88%80+i%2C+Add+%28%CE%B2+i%29%5D+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28x+%2B+y%29+%3D+ofHamming+x+%2B+ofHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_sub+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%7Bx+y+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28x+-+y%29+%3D+toHamming+x+-+toHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_sub+%5B%E2%88%80+i%2C+Sub+%28%CE%B2+i%29%5D+%7Bx+y+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28x+-+y%29+%3D+ofHamming+x+-+ofHamming+y+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+toHamming_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Br+%3A+%CE%B1%7D+%7Bx+%3A+%E2%88%80+i%2C+%CE%B2+i%7D+%3A%0A++++toHamming+%28r+%E2%80%A2+x%29+%3D+r+%E2%80%A2+toHamming+x+%3A%3D+by+sorry%0A%0A%40%5Btarget%2C+simp%5D%0Atheorem+ofHamming_smul+%5B%E2%88%80+i%2C+SMul+%CE%B1+%28%CE%B2+i%29%5D+%7Br+%3A+%CE%B1%7D+%7Bx+%3A+Hamming+%CE%B2%7D+%3A%0A++++ofHamming+%28r+%E2%80%A2+x%29+%3D+r+%E2%80%A2+ofHamming+x+%3A%3D+by+sorry%0A%0Asection%0A%0A%2F-%21+Instances+equipping+%60Hamming%60+with+%60hammingNorm%60+and+%60hammingDist%60.+-%2F%0A%0Avariable+%5BFintype+%CE%B9%5D+%5B%E2%88%80+i%2C+DecidableEq+%28%CE%B2+i%29%5D%0A%0Ainstance+%3A+Dist+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+x+y+%3D%3E+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29%E2%9F%A9%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+dist_eq_hammingDist+%28x+y+%3A+Hamming+%CE%B2%29+%3A%0A++++dist+x+y+%3D+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29+%3A%3D+by+sorry%0A%0A%40%5Btarget%5D%0Ainstance+%3A+PseudoMetricSpace+%28Hamming+%CE%B2%29+where%0A++dist_self+%3A%3D+by%0A++++sorry%0A++dist_comm+%3A%3D+by%0A++++sorry%0A++dist_triangle+%3A%3D+by%0A++++sorry%0A++toUniformSpace+%3A%3D+%E2%8A%A5%0A++uniformity_dist+%3A%3D+uniformity_dist_of_mem_uniformity+_+_+fun+s+%3D%3E+by%0A++++sorry%0A++toBornology+%3A%3D+sorry%0A++cobounded_sets+%3A%3D+by%0A++++sorry%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+nndist_eq_hammingDist+%28x+y+%3A+Hamming+%CE%B2%29+%3A%0A++++nndist+x+y+%3D+hammingDist+%28ofHamming+x%29+%28ofHamming+y%29+%3A%3D+by+sorry%0A%0Ainstance+%3A+DiscreteTopology+%28Hamming+%CE%B2%29+%3A%3D+%E2%9F%A8rfl%E2%9F%A9%0A%0Ainstance+%3A+MetricSpace+%28Hamming+%CE%B2%29+%3A%3D+.ofT0PseudoMetricSpace+_%0A%0Ainstance+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%3A+Norm+%28Hamming+%CE%B2%29+%3A%3D%0A++%E2%9F%A8fun+x+%3D%3E+hammingNorm+%28ofHamming+x%29%E2%9F%A9%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+norm_eq_hammingNorm+%5B%E2%88%80+i%2C+Zero+%28%CE%B2+i%29%5D+%28x+%3A+Hamming+%CE%B2%29+%3A+%E2%80%96x%E2%80%96+%3D+hammingNorm+%28ofHamming+x%29+%3A%3D+by+sorry%0A%0Ainstance+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%3A+NormedAddGroup+%28Hamming+%CE%B2%29+where%0A++dist_eq+%3A%3D+by+push_cast%3B+exact+mod_cast+hammingDist_eq_hammingNorm%0A%0Ainstance+%5B%E2%88%80+i%2C+AddCommGroup+%28%CE%B2+i%29%5D+%3A+NormedAddCommGroup+%28Hamming+%CE%B2%29+where%0A++dist_eq+%3A%3D+by+push_cast%3B+exact+mod_cast+hammingDist_eq_hammingNorm%0A%0A%40%5Btarget%2C+simp%2C+push_cast%5D%0Atheorem+nnnorm_eq_hammingNorm+%5B%E2%88%80+i%2C+AddGroup+%28%CE%B2+i%29%5D+%28x+%3A+Hamming+%CE%B2%29+%3A%0A++++%E2%80%96x%E2%80%96%E2%82%8A+%3D+hammingNorm+%28ofHamming+x%29+%3A%3D+by+sorry%0A%0Aend%0A%0Aend+Hamming%0A%0Aend+AgoraInformationTheory%0A&project_id=99342d3d-5d89-4746-91fd-60ea3946b6f2&ephemeral=false HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52876 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:34976 - "GET /health HTTP/1.1" 200 OK
+INFO:     172.25.0.7:35534 - "GET /projects?agent_id=0ee84a49-4238-4418-b7c0-9d3e1a8b802b HTTP/1.1" 200 OK
+INFO:     172.25.0.7:35534 - "GET /projects HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60276 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38362 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54566 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:36678 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45082 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47256 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:47724 - "GET /health HTTP/1.1" 200 OK
+[Worker 0] Cancelled
+[Worker 0] Stopped
+[Worker 1] Cancelled
+[Worker 1] Stopped
+[Worker 2] Cancelled
+[Worker 2] Stopped
+[Worker 3] Cancelled
+[Worker 3] Stopped
+[ExecutionEngine] Stopped all workers
+[ExecutionEngine] Global engine shut down
+[LeanInterfaceRegistry] Cleared all interfaces
+[LeanInterfaceRegistry] Global registry shut down
