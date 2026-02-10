@@ -131,7 +131,7 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
     2. check rules:
       a. decls in target must be present in submission with same type
       b. the tagged items in the target must also be the only tagged items in the submission
-      c. both target and submission must both have no errors, and only allow for warnings within the tagged items
+      c. both target and submission must both have no blocking errors (warnings are informational)
     3. if the rules pass, check against safeVerify. Namely, get the environment after the final item in both the submitted/target lists, called env_sub, env_targ. if target?.isNone, then run replayFileDirect env_targ []. store the outputs and run replayFileDirect env_sub with the outputs from the target run as the targets. This outputs a list of infos.
     4. if the latter safeVerify passes, continue. else return error
     5. construct a fileDescriptor from submitted_flat.
@@ -171,100 +171,67 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
 
     let descriptorMsgs (env : Environment) (item : CompilationStep × ConstantInfo × Bool) :
         IO (List (MessageSeverity × String)) := do
-      let (cs, ci, is_tagged) := item
+      let (cs, ci, _) := item
       let baseMsgs ← compilerMsgs cs
-      let syntheticMsgs :=
-        if is_tagged then
-          let (_, _, msgs) := axiomAudit env ci.name
-          msgs
-        else
-          []
+      let (_, _, syntheticMsgs) := axiomAudit env ci.name
       return dedupMessages (baseMsgs ++ syntheticMsgs)
 
-    let isResolved (msgs : List (MessageSeverity × String)) : Bool :=
-      msgs.all (fun (sev, _) => sev != MessageSeverity.error && sev != MessageSeverity.warning)
-
-    let msgsToJson (msgs : List (MessageSeverity × String)) : Json :=
-      Json.arr <| msgs.toArray.map (fun (sev, data) =>
-        Json.mkObj [("severity", ToJson.toJson sev), ("data", Json.str data)]
-      )
-
-    let correct? (cs : CompilationStep) (is_tagged: Bool) : Bool :=
-      if is_tagged then
-        cs.msgs.all (fun m => m.severity != MessageSeverity.error)
-      else
-        cs.msgs.all (fun m => m.severity != MessageSeverity.error && m.severity != MessageSeverity.warning)
-      -- i.e. tagged items can have warnings, untagged items cannot
-    let disallowedMsg? (is_tagged : Bool) (severity : MessageSeverity) : Bool :=
-      if is_tagged then
-        severity == MessageSeverity.error
-      else
-        severity == MessageSeverity.error || severity == MessageSeverity.warning
-    let collectViolations (sourceLabel : String) (items : List (CompilationStep × ConstantInfo × Bool)) : IO (Array Json) := do
+    let collectErrors (sourceLabel : String) (env : Environment) (items : List (CompilationStep × ConstantInfo × Bool)) : IO (Array Json) := do
       let mut violations : Array Json := #[]
-      for (cs, ci, is_tagged) in items do
-        for m in cs.msgs do
-          if disallowedMsg? is_tagged m.severity then
-            let msgText ← m.data.toString
+      for item@(_, ci, is_tagged) in items do
+        let msgs ← descriptorMsgs env item
+        for (sev, msgText) in msgs do
+          if sev == MessageSeverity.error then
             violations := violations.push <| Json.mkObj [
               ("source", Json.str sourceLabel),
               ("name", Json.str ci.name.toString),
               ("is_tagged", Json.bool is_tagged),
-              ("severity", ToJson.toJson m.severity),
+              ("severity", ToJson.toJson sev),
               ("message", Json.str msgText)
             ]
       return violations
-    let all_targets_correct := targetData.all (fun (cs, _, is_tagged) => correct? cs is_tagged)
-    let all_submitted_correct := submittedData.all (fun (cs, _, is_tagged) => correct? cs is_tagged)
-    if not (all_targets_correct && all_submitted_correct) then
-      let targetViolations ← collectViolations "target" targetData
-      let submittedViolations ← collectViolations "submission" submittedData
+    let targetViolations ← collectErrors "target" env_targ targetData
+    let submittedViolations ← collectErrors "submission" env_sub submittedData
+    if (targetViolations.size + submittedViolations.size) > 0 then
       let diagnostics := Json.mkObj [
-        ("summary", Json.str "The submission or target contains errors or warnings outside of the tagged items."),
-        ("rule", Json.str "Untagged declarations may not emit errors or warnings; tagged declarations may emit warnings but not errors."),
+        ("summary", Json.str "The submission or target contains blocking errors."),
+        ("rule", Json.str "Warnings are informational; declarations fail only on errors (including disallowed axioms)."),
         ("offending_messages", Json.arr (targetViolations ++ submittedViolations))
       ]
-      throw <| IO.userError s!"The submission or target contains errors or warnings outside of the tagged items.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
-    IO.println "Checked no errors/warnings outside tagged items"
-
-    -- disallow regressions where a previously resolved target becomes unresolved
-    let targetTaggedData := targetData.filter (fun (_, _, is_tagged) => is_tagged)
-    let submittedTaggedData := submittedData.filter (fun (_, _, is_tagged) => is_tagged)
-    if targetTaggedData.length != submittedTaggedData.length then
-      throw <| IO.userError "Internal error: tagged declaration counts differ after parity checks."
-
-    let mut regressions : Array Json := #[]
-    for (targetItem, submittedItem) in List.zip targetTaggedData submittedTaggedData do
-      let (_, targetCi, _) := targetItem
-      let (_, submittedCi, _) := submittedItem
-      if targetCi.name != submittedCi.name then
-        throw <| IO.userError s!"Internal error: tagged declaration mismatch at {targetCi.name} vs {submittedCi.name}"
-
-      let targetMsgs ← descriptorMsgs env_targ targetItem
-      let submittedMsgs ← descriptorMsgs env_sub submittedItem
-      if isResolved targetMsgs && !(isResolved submittedMsgs) then
-        regressions := regressions.push <| Json.mkObj [
-          ("name", Json.str targetCi.name.toString),
-          ("target_messages", msgsToJson targetMsgs),
-          ("submission_messages", msgsToJson submittedMsgs)
-        ]
-
-    if regressions.size > 0 then
-      let diagnostics := Json.mkObj [
-        ("summary", Json.str "Resolved targets regressed to unresolved status."),
-        ("rule", Json.str "A tagged declaration that is resolved in the target must remain resolved in the submission."),
-        ("regressions", Json.arr regressions)
-      ]
-      throw <| IO.userError s!"Resolved target regression detected.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
-    IO.println "Checked no resolved target regressions"
+      throw <| IO.userError s!"The submission or target contains blocking errors.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
+    IO.println "Checked no blocking errors"
 
     -- all rules passed, now run safeVerify
     let targetInfos ← replayFileDirect env_targ
-    -- let task ← IO.asTask (replayFileDirect env_sub targetInfos)
-    -- if let .error e:=task.get then
-    --   IO.eprintln s!"found a problem in submission."
-    --   throw e
-    let _ ← replayFileDirect env_sub targetInfos (targetData.filterMap (fun (_,ci,is_tagged) => if is_tagged then some ci.name else none))
+    let taggedNames := targetData.filterMap (fun (_,ci,is_tagged) => if is_tagged then some ci.name else none)
+    let submittedInfos ← replayFileDirect env_sub targetInfos taggedNames
+
+    -- disallow regressions where a previously-resolved tagged declaration gains sorry after safeVerify replay
+    let mut regressions : Array Json := #[]
+    for n in taggedNames do
+      let targetInfo? := targetInfos.find? (fun info => info.name == n)
+      let submittedInfo? := submittedInfos.find? (fun info => info.name == n)
+      match (targetInfo?, submittedInfo?) with
+      | (some targetInfo, some submittedInfo) =>
+        let targetUsesSorry := targetInfo.axioms.contains `sorryAx
+        let submittedUsesSorry := submittedInfo.axioms.contains `sorryAx
+        if (!targetUsesSorry) && submittedUsesSorry then
+          regressions := regressions.push <| Json.mkObj [
+            ("name", Json.str n.toString),
+            ("target_axioms", Json.arr <| targetInfo.axioms.map (fun a => Json.str a.toString)),
+            ("submission_axioms", Json.arr <| submittedInfo.axioms.map (fun a => Json.str a.toString))
+          ]
+      | _ =>
+        throw <| IO.userError s!"Internal error: missing tagged declaration {n} in safeVerify outputs."
+
+    if regressions.size > 0 then
+      let diagnostics := Json.mkObj [
+        ("summary", Json.str "Resolved targets regressed to unresolved status after safeVerify."),
+        ("rule", Json.str "A tagged declaration resolved in target must not reintroduce sorry in submission."),
+        ("regressions", Json.arr regressions)
+      ]
+      throw <| IO.userError s!"Resolved target regression detected.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
+    IO.println "Checked no resolved target regressions (post-safeVerify)"
 
     IO.println s!"Finished with no errors; building file descriptor."
 
