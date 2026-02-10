@@ -144,25 +144,25 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
     IO.println "[Finished imports]"
     let targetTargetDecls := targetAttribute.getDecls env_targ
     let targetSubmittedDecls := targetAttribute.getDecls env_sub
-    let targetData := targets_flat.map (fun (c, ci) => (c, ci, targetTargetDecls.contains ci.name))
-    let submittedData := submitted_flat.map (fun (c, ci) => (c, ci, targetSubmittedDecls.contains ci.name))
+    let targetData := targets_flat.map (fun (c, ci) => (c, ci, targetTargetDecls.contains ci.name)) -- mark the decls in the target file that are tagged
+    let submittedData := submitted_flat.map (fun (c, ci) => (c, ci, targetSubmittedDecls.contains ci.name)) -- mark the decls in the submitted file that are tagged
 
     -- check rules
-    let target_decls := targetData.map (fun (_, ci, _) => (ci.name, ci.type))
+    let target_decls := targetData.map (fun (_, ci, _) => (ci.name, ci.type)) -- get the names and types of the decls in the target file and submission
     let submitted_decls := submittedData.map (fun (_, ci, _) => (ci.name, ci.type))
-    let same_decls := target_decls == submitted_decls
+    let same_decls := target_decls == submitted_decls -- require that the target and submission have the same decls and types are unchanged
     if not same_decls then
       throw <| IO.userError s!"The submission does not contain the same declarations as the target:\n {target_decls}\n [vs]\n {submitted_decls}"
     IO.println "Checked same declarations"
 
     let targets_tagged := targetData.filterMap (fun (_, ci, is_tagged) => if is_tagged then some (ci.name, ci.type) else none)
     let submitted_tagged := submittedData.filterMap (fun (_, ci, is_tagged) => if is_tagged then some (ci.name, ci.type) else none)
-    let same_tagged := targets_tagged == submitted_tagged
+    let same_tagged := targets_tagged == submitted_tagged -- require that we haven't added or removed any tagged decls in the submission compared to the target
     if not same_tagged then
       throw <| IO.userError s!"The submission does not contain the same tagged declarations as the target:\n {targets_tagged}\n [vs]\n {submitted_tagged}"
     IO.println "Checked same tagged declarations"
 
-    let compilerMsgs (cs : CompilationStep) : IO (List (MessageSeverity × String)) := do
+    let compilerMsgs (cs : CompilationStep) : IO (List (MessageSeverity × String)) := do -- given a compilation step, return all msgs
       let mut msgs := #[]
       for m in cs.msgs do
         let st ← m.data.toString
@@ -170,6 +170,7 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
       pure msgs.toList
 
     let descriptorMsgs (env : Environment) (item : CompilationStep × ConstantInfo × Bool) :
+    -- given an environment, and a (cStep, info, is_tagged), return error/warning/info msgs and synthetic ones too
         IO (List (MessageSeverity × String)) := do
       let (cs, ci, _) := item
       let baseMsgs ← compilerMsgs cs
@@ -178,6 +179,7 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
 
     let collectErrors (sourceLabel : String) (env : Environment) (items : List (CompilationStep × ConstantInfo × Bool)) : IO (Array Json) := do
       let mut violations : Array Json := #[]
+      --given a list of items, collect all errors in them and package with metadaa
       for item@(_, ci, is_tagged) in items do
         let msgs ← descriptorMsgs env item
         for (sev, msgText) in msgs do
@@ -190,9 +192,9 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
               ("message", Json.str msgText)
             ]
       return violations
-    let targetViolations ← collectErrors "target" env_targ targetData
-    let submittedViolations ← collectErrors "submission" env_sub submittedData
-    if (targetViolations.size + submittedViolations.size) > 0 then
+    let targetViolations ← collectErrors "target" env_targ targetData -- get all errors in the target
+    let submittedViolations ← collectErrors "submission" env_sub submittedData -- get all errors in the submission
+    if (targetViolations.size + submittedViolations.size) > 0 then -- fail if there are *any* errors in either
       let diagnostics := Json.mkObj [
         ("summary", Json.str "The submission or target contains blocking errors."),
         ("rule", Json.str "Warnings are informational; declarations fail only on errors (including disallowed axioms)."),
@@ -206,16 +208,49 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
     let taggedNames := targetData.filterMap (fun (_,ci,is_tagged) => if is_tagged then some ci.name else none)
     let submittedInfos ← replayFileDirect env_sub targetInfos taggedNames
 
+    IO.println "Finished safeVerify with no errors; double-checking no regressions"
+
     -- disallow regressions where a previously-resolved tagged declaration gains sorry after safeVerify replay
+
+
+    -- -- error message regression: target had no errors, but submission has errors
+    -- let mut regressions : Array Json := #[]
+    -- for (targetItem, submittedItem) in List.zip targetTaggedData submittedTaggedData do
+    --   let (_, targetCi, _) := targetItem
+    --   let (_, submittedCi, _) := submittedItem
+    --   if targetCi.name != submittedCi.name then
+    --     throw <| IO.userError s!"Internal error: tagged declaration mismatch at {targetCi.name} vs {submittedCi.name}"
+
+    --   let targetMsgs ← descriptorMsgs env_targ targetItem
+    --   let submittedMsgs ← descriptorMsgs env_sub submittedItem
+    --   if isResolved targetMsgs && !(isResolved submittedMsgs) then
+    --     regressions := regressions.push <| Json.mkObj [
+    --       ("name", Json.str targetCi.name.toString),
+    --       ("target_messages", msgsToJson targetMsgs),
+    --       ("submission_messages", msgsToJson submittedMsgs)
+    --     ]
+
+    -- if regressions.size > 0 then
+    --   let diagnostics := Json.mkObj [
+    --     ("summary", Json.str "Resolved targets regressed to unresolved status."),
+    --     ("rule", Json.str "A tagged declaration that is resolved in the target must remain resolved in the submission."),
+    --     ("regressions", Json.arr regressions)
+    --   ]
+    --   throw <| IO.userError s!"Resolved target regression detected.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
+    -- IO.println "Checked no resolved target regressions"
+
+
+    -- axiom regression: target had no disallowed and no sorry, but submission had either
+
     let mut regressions : Array Json := #[]
     for n in taggedNames do
       let targetInfo? := targetInfos.find? (fun info => info.name == n)
       let submittedInfo? := submittedInfos.find? (fun info => info.name == n)
       match (targetInfo?, submittedInfo?) with
       | (some targetInfo, some submittedInfo) =>
-        let targetUsesSorry := targetInfo.axioms.contains `sorryAx
-        let submittedUsesSorry := submittedInfo.axioms.contains `sorryAx
-        if (!targetUsesSorry) && submittedUsesSorry then
+        let targetResolvedAxiomUsage := targetInfo.axioms.all (fun ax => AllowedAxioms.contains ax)
+        let submittedResolvedAxiomUsage := submittedInfo.axioms.all (fun ax => AllowedAxioms.contains ax)
+        if targetResolvedAxiomUsage && !submittedResolvedAxiomUsage then
           regressions := regressions.push <| Json.mkObj [
             ("name", Json.str n.toString),
             ("target_axioms", Json.arr <| targetInfo.axioms.map (fun a => Json.str a.toString)),
@@ -227,11 +262,15 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
     if regressions.size > 0 then
       let diagnostics := Json.mkObj [
         ("summary", Json.str "Resolved targets regressed to unresolved status after safeVerify."),
-        ("rule", Json.str "A tagged declaration resolved in target must not reintroduce sorry in submission."),
+        ("rule", Json.str "A tagged declaration resolved in target must not reintroduce disallowed axioms in submission."),
         ("regressions", Json.arr regressions)
       ]
       throw <| IO.userError s!"Resolved target regression detected.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
     IO.println "Checked no resolved target regressions (post-safeVerify)"
+
+
+
+
 
     IO.println s!"Finished with no errors; building file descriptor."
 
