@@ -257,7 +257,9 @@ unsafe def getTargets' (submitted : String) (target? : Option String := none) (d
             ("submission_axioms", Json.arr <| submittedInfo.axioms.map (fun a => Json.str a.toString))
           ]
       | _ =>
-        throw <| IO.userError s!"Internal error: missing tagged declaration {n} in safeVerify outputs."
+        let targetInfos := targetInfos.map (fun info => info.name)
+        let submittedInfos := submittedInfos.map (fun info => info.name)
+        throw <| IO.userError s!"Internal error: missing tagged declaration {n} in safeVerify outputs.\nTarget infos: {targetInfos}\nSubmitted infos: {submittedInfos}"
 
     if regressions.size > 0 then
       let diagnostics := Json.mkObj [
