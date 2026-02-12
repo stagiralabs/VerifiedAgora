@@ -3,309 +3,142 @@ import VerifiedAgora.tagger
 import VerifiedAgora.Frontend
 import VerifiedAgora.TacticInvocation
 import VerifiedAgora.Utils
-open Lean Core Elab IO Meta Term Command Tactic Cli
+open Lean Core Elab IO Meta Term Command Tactic Cli Environment
 
 
+def printExpr (ex : Expr) (env : Environment) : IO Format := do
+  let ctx:={fileName:="", fileMap:=default}
+  Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ex) ctx {env:=env})
 
-unsafe def replayFileDirect (final_env : Environment) (targets : Array _root_.Info := #[]) (marked : List Name := []): IO (Array _root_.Info) := do
-  let mod ← mkModuleData final_env
-  let env ← importModules mod.imports {} 0
-  IO.println "Finished imports"
+def isHumanDecl (name : Name) (env : Environment) : IO (Option DeclarationRanges) := do
+  let ctx := {fileName:="", fileMap:=default}
+  let state : Core.State := {env := env}
+  let fn : CoreM (Option DeclarationRanges) := do
+    let hasDeclRange := (← Lean.findDeclarationRanges? name)
+    let notProjFn := !(← Lean.isProjectionFn name)
+
+    match (hasDeclRange, notProjFn) with
+    | (some rng, true) => return (some rng)
+    | _ => return none
+
+  let result? ← CoreM.run' fn ctx state |>.toIO'
+  match result?.toOption with
+  | some x => pure x
+  | none => pure none
+
+def getDescriptorForModule (mod : Name) (targetDescriptor? : Option FileDescriptor := none) (sourceFile? : Option System.FilePath := none) : IO FileDescriptor := do
+
+  let (moduleData, _) ← readModuleData (← findOLean mod)
+  let env ← importModules moduleData.imports {} 0
+  -- IO.println s!"Imported module data."
+
   let mut newConstants := {}
-  for name in mod.constNames, ci in mod.constants do
+  for name in moduleData.constNames, ci in moduleData.constants do
     newConstants := newConstants.insert name ci
   let mut env' ← env.replay newConstants
-  IO.println "Finished replay"
-  --env' ← setImportedEntries env' #[mod]
-  --env' ← finalizePersistentExtensions env' #[mod] {}
-  let ctx:={fileName:="", fileMap:=default}
-  let isHumanDecl : Name → IO Bool := fun name => do
-    let state : Core.State := {env := env'}
-    match (← CoreM.run (do
-      let hasDeclRange := (← Lean.findDeclarationRanges? name).isSome
-      let notProjFn := !(← Lean.isProjectionFn name)
-      return hasDeclRange && notProjFn
-    ) ctx state |>.toIO').toOption with
-    | some x => pure x.1
-    | none => pure false
+  -- IO.println s!"Replayed constants."
 
-  let mut ret:Array _root_.Info:= #[]
+  let env'' ← importModules #[{ module := mod }] {} 0
+  let tagged_decls := env''.constants.fold (fun acc k ci => if TagAttribute.hasTag targetAttribute env'' k then ci::acc else acc) []
+  let tagged_decl_names : Std.HashSet Name := tagged_decls.foldl (fun s ci => s.insert ci.name) {}
+  -- IO.println s!"Found {tagged_decls.length} tagged declarations in the environment."
+
+  let mut ret:Array (DeclarationDescriptor × DeclarationRanges) := #[]
   for (n,ci) in env'.constants.map₂  do
+    -- IO.println s!"Processing declaration {n} of kind {ci.kind}..."
     if ci.kind ∈ ["theorem", "def"] then
       if let .defnInfo dv := ci then
         if dv.safety != .safe then
-          throw <| IO.userError s!"unsafe/partial function {n} detected"
-      if (← isHumanDecl n) then
-        IO.println "---"
-        IO.println ci.kind
-        IO.println n
-        IO.println <| ←  Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ci.type) ctx {env:=env'})
-        if ci.kind=="def" then
-          IO.println s!":= {ci.value!}"
-        let (_,s):=(CollectAxioms.collect n).run env' |>.run {}
-        IO.println s.axioms
-        IO.println s!"isTarget? : {marked.contains n}"
-        --let nc:=isNoncomputable env' n
-        --IO.println s!"noncomputable: {nc}"
-        ret:=ret.push ⟨ n,ci,s.axioms⟩
-
-  if targets.size>0 then
-    for ⟨ n,ci,axs⟩ in targets do
-      if (← isHumanDecl n) then
-        if let some ci':=env'.constants.map₂.find? n then
-          if ci.kind ≠ ci'.kind then
-            throw <| IO.userError s!"{ci'.kind} {n} is not the same kind as the requirement {ci.kind} {n}"
-          if ci'.kind=="theorem" then
-            if Not (equivThm ci ci') then
-              throw <| IO.userError s!"theorem {n} does not match the required theorem signature"
-          if ci'.kind=="def" then
-            if Not (equivDefn ci ci' (`sorryAx ∉ axs)) then
-              throw <| IO.userError s!"definition {n} does not match the requirement"
-            --if (¬ nc) && isNoncomputable env' n then
-            --  throw <| IO.userError s!"definition {n} is noncomputable"
-          -- let allow_sorry? := marked.length > 0 || n ∈ marked
-          let allow_sorry? := n ∈ marked
-          checkAxioms env' n allow_sorry?
-        else
-          throw <| IO.userError s!"{n} not found in submission"
-  --env'.freeRegions
-  --region.free
-  return ret
-
-
-
--- def process (submitted : Environment) (target : Option Environment := none) : IO FileDescriptor := do
---   let success ←match target with
---   | none =>
---     return replayFileDirect submitted
---   | some target =>
---     let targetInfos ← replayFileDirect target
---     let task ← IO.asTask (replayFileDirect submitted targetInfos)
---     if let .error e:=task.get then
---       IO.eprintln s!"found a problem in submission."
---       throw e
---     IO.println s!"Finished with no errors."
-
-
-
-def Lean.Name.isHumanTheorem (name : Name) : CoreM Bool := do
-  let hasDeclRange := (← Lean.findDeclarationRanges? name).isSome
-  -- let isTheorem ← Name.isTheorem name
-  let notProjFn := !(← Lean.isProjectionFn name)
-  return hasDeclRange --&& isTheorem
-    && notProjFn
-
-
-def onlyHuman (targets : List (CompilationStep × ConstantInfo)) : IO (List (CompilationStep × ConstantInfo)) := do
-  let mut targets_new : Array (CompilationStep × ConstantInfo) := #[]
-
-  for (cmd, ci) in targets do
-    let pf_env := cmd.after
-    let ctx : Core.Context := {fileName := "", fileMap := default}
-    let state : Core.State := {env := pf_env}
-    let isHuman := match (← CoreM.run (Lean.Name.isHumanTheorem ci.name) ctx state |>.toIO').toOption with
-      | some x => x.1
-      | none => false
-    if not isHuman then
-      continue
-
-    targets_new := targets_new.push (cmd, ci)
-  return targets_new.toList
-
-
-unsafe def getTargets' (submitted : String) (target? : Option String := none) (diff? : Bool := False) (source_file : Option System.FilePath := none): IO FileDescriptor := do
-  let target := target?.getD submitted
-  let target_steps := Lean.Elab.IO.processInput' target
-  let targets_cs := target_steps.bind fun c => (MLList.ofList c.diff).map fun i => (c, i)
-  let targets_flat ← (onlyHuman (← targets_cs.force))
-  let submitted_flat : List (CompilationStep × ConstantInfo) ← if target?.isNone then pure targets_flat else do
-    let submitted_steps := Lean.Elab.IO.processInput' submitted
-    let temp ← submitted_steps.force
-    IO.println s!"Processed {temp.length} compilation steps in submission"
-
-    let submitted_cs := submitted_steps.bind fun c => (MLList.ofList c.diff).map fun i => (c, i)
-    onlyHuman (← submitted_cs.force)
-
-  /- now that we have the decls for both target and submission, we need to:
-    1. mark the decls that are tagged
-    2. check rules:
-      a. decls in target must be present in submission with same type
-      b. the tagged items in the target must also be the only tagged items in the submission
-      c. both target and submission must both have no blocking errors (warnings are informational)
-    3. if the rules pass, check against safeVerify. Namely, get the environment after the final item in both the submitted/target lists, called env_sub, env_targ. if target?.isNone, then run replayFileDirect env_targ []. store the outputs and run replayFileDirect env_sub with the outputs from the target run as the targets. This outputs a list of infos.
-    4. if the latter safeVerify passes, continue. else return error
-    5. construct a fileDescriptor from submitted_flat.
-  -/
-  let final_env_targets? := targets_flat.getLast?.map (fun (c, _) => c.after)
-  let final_env_submitted? := submitted_flat.getLast?.map (fun (c, _) => c.after)
-
-  match (final_env_submitted?, final_env_targets?) with
-  | (some env_sub, some env_targ) =>
-    IO.println "[Finished imports]"
-    let targetTargetDecls := targetAttribute.getDecls env_targ
-    let targetSubmittedDecls := targetAttribute.getDecls env_sub
-    let targetData := targets_flat.map (fun (c, ci) => (c, ci, targetTargetDecls.contains ci.name)) -- mark the decls in the target file that are tagged
-    let submittedData := submitted_flat.map (fun (c, ci) => (c, ci, targetSubmittedDecls.contains ci.name)) -- mark the decls in the submitted file that are tagged
-
-    -- check rules
-    let target_decls := targetData.map (fun (_, ci, _) => (ci.name, ci.type)) -- get the names and types of the decls in the target file and submission
-    let submitted_decls := submittedData.map (fun (_, ci, _) => (ci.name, ci.type))
-    let same_decls := target_decls == submitted_decls -- require that the target and submission have the same decls and types are unchanged
-    if not same_decls then
-      throw <| IO.userError s!"The submission does not contain the same declarations as the target:\n {target_decls}\n [vs]\n {submitted_decls}"
-    IO.println "Checked same declarations"
-
-    let targets_tagged := targetData.filterMap (fun (_, ci, is_tagged) => if is_tagged then some (ci.name, ci.type) else none)
-    let submitted_tagged := submittedData.filterMap (fun (_, ci, is_tagged) => if is_tagged then some (ci.name, ci.type) else none)
-    let same_tagged := targets_tagged == submitted_tagged -- require that we haven't added or removed any tagged decls in the submission compared to the target
-    if not same_tagged then
-      throw <| IO.userError s!"The submission does not contain the same tagged declarations as the target:\n {targets_tagged}\n [vs]\n {submitted_tagged}"
-    IO.println "Checked same tagged declarations"
-
-    let compilerMsgs (cs : CompilationStep) : IO (List (MessageSeverity × String)) := do -- given a compilation step, return all msgs
-      let mut msgs := #[]
-      for m in cs.msgs do
-        let st ← m.data.toString
-        msgs := msgs.push (m.severity, st)
-      pure msgs.toList
-
-    let descriptorMsgs (env : Environment) (item : CompilationStep × ConstantInfo × Bool) :
-    -- given an environment, and a (cStep, info, is_tagged), return error/warning/info msgs and synthetic ones too
-        IO (List (MessageSeverity × String)) := do
-      let (cs, ci, _) := item
-      let baseMsgs ← compilerMsgs cs
-      let (_, _, syntheticMsgs) := axiomAudit env ci.name
-      return dedupMessages (baseMsgs ++ syntheticMsgs)
-
-    let collectErrors (sourceLabel : String) (env : Environment) (items : List (CompilationStep × ConstantInfo × Bool)) : IO (Array Json) := do
-      let mut violations : Array Json := #[]
-      --given a list of items, collect all errors in them and package with metadaa
-      for item@(_, ci, is_tagged) in items do
-        let msgs ← descriptorMsgs env item
-        for (sev, msgText) in msgs do
-          if sev == MessageSeverity.error then
-            violations := violations.push <| Json.mkObj [
-              ("source", Json.str sourceLabel),
-              ("name", Json.str ci.name.toString),
-              ("is_tagged", Json.bool is_tagged),
-              ("severity", ToJson.toJson sev),
-              ("message", Json.str msgText)
+          let str_safety := match dv.safety with
+            | .safe => "safe"
+            | .unsafe => "unsafe"
+            | .partial => "partial"
+          throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
+            ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
+            ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
             ]
-      return violations
-    let targetViolations ← collectErrors "target" env_targ targetData -- get all errors in the target
-    let submittedViolations ← collectErrors "submission" env_sub submittedData -- get all errors in the submission
-    if (targetViolations.size + submittedViolations.size) > 0 then -- fail if there are *any* errors in either
-      let diagnostics := Json.mkObj [
-        ("summary", Json.str "The submission or target contains blocking errors."),
-        ("rule", Json.str "Warnings are informational; declarations fail only on errors (including disallowed axioms)."),
-        ("offending_messages", Json.arr (targetViolations ++ submittedViolations))
-      ]
-      throw <| IO.userError s!"The submission or target contains blocking errors.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
-    IO.println "Checked no blocking errors"
 
-    -- all rules passed, now run safeVerify
-    let targetInfos ← replayFileDirect env_targ
-    let taggedNames := targetData.filterMap (fun (_,ci,is_tagged) => if is_tagged then some ci.name else none)
-    let submittedInfos ← replayFileDirect env_sub targetInfos taggedNames
+      if let some rng ← isHumanDecl n env'' then
+        ret:=ret.push ({
+          ci := ci,
+          contents := default, -- we fill this in later since we need the file map for it
+          context := default, -- we fill this in later since we need the file map for it
+          target? := tagged_decl_names.contains n,
+          sourceFile? := sourceFile?,
+          axioms := default, -- we fill this in later when we do regression and axiom checking
+          resolved? := default -- same
+        },rng)
 
-    IO.println "Finished safeVerify with no errors; double-checking no regressions"
+  let mut axiomMap : Std.HashMap Name (Array Name) := {}
+  let exprPrinter (e : Expr) := printExpr e env'
 
-    -- disallow regressions where a previously-resolved tagged declaration gains sorry after safeVerify replay
+  if (targetDescriptor?.getD []).length > 0 then
+    for target in targetDescriptor?.getD [] do
+      if (← isHumanDecl target.ci.name env'').isSome then
+        if let some ci':=env'.constants.map₂.find? target.ci.name then
+          if target.ci.kind ≠ ci'.kind then
+            throw <| diagnosticErrorMessage s!"Declaration kind mismatch between current and attempted contribution" <|
+            Json.mkObj [
+              ("summary", Json.str "The declaration kind in the attempted contribution does not match the corresponding declaration in the current version."),
+              ("offending declaration", Json.str s!"Declaration {target.ci.name} has kind \"{ci'.kind}\" in the attempted contribution, but is expected to have kind \"{target.ci.kind}\".")
+            ]
+          if ci'.kind=="theorem" then
+            if Not (equivThm target.ci ci') then
+              throw <| diagnosticErrorMessage s!"Theorem statement mismatch between current and attempted contribution" <|
+              Json.mkObj [
+                ("summary", Json.str "A theorem statement in the attempted contribution does not match the corresponding theorem statement in the current version. Please ensure that the statement (type, name, etc.) of the theorem is exactly the same as in the current version."),
+                ("offending declaration", Json.str s!"Theorem {target.ci.name} has type \"{← exprPrinter ci'.type}\" in the attempted contribution, but is expected to have type \"{← exprPrinter target.ci.type}\".")
+              ]
+          if ci'.kind=="def" then
+            if Not (equivDefn target.ci ci' (`sorryAx ∉ target.axioms)) then
+              let valStr ← if `sorryAx ∉ target.axioms then
+                pure s!" \n\nAdditionally, the definitions have the following values:\n\nThe attempted contribution has value: \"{← exprPrinter ci'.value!}\"\n\nThe contribution is expected to have value: \"{← exprPrinter target.ci.value!}\""
+              else pure ""
+              throw <| diagnosticErrorMessage s!"Definition statement mismatch between current and attempted contribution" <| Json.mkObj [
+                ("summary", Json.str "A definition statement in the attempted contribution does not match the corresponding definition statement in the current version. Please ensure that the statement (type, name, etc.) of the definition is exactly the same as in the current version. Additionally, unless the definition's value relies on the `sorry` axiom, the value of the definition must also be exactly the same."),
+                ("offending declaration", Json.str <| s!"Definition {target.ci.name} has type:\n\n \"{← exprPrinter ci'.type}\" \n\nin the attempted contribution, and is expected to have type \n\n \"{← exprPrinter target.ci.type}\"" ++ valStr)
+              ]
 
-
-    -- -- error message regression: target had no errors, but submission has errors
-    -- let mut regressions : Array Json := #[]
-    -- for (targetItem, submittedItem) in List.zip targetTaggedData submittedTaggedData do
-    --   let (_, targetCi, _) := targetItem
-    --   let (_, submittedCi, _) := submittedItem
-    --   if targetCi.name != submittedCi.name then
-    --     throw <| IO.userError s!"Internal error: tagged declaration mismatch at {targetCi.name} vs {submittedCi.name}"
-
-    --   let targetMsgs ← descriptorMsgs env_targ targetItem
-    --   let submittedMsgs ← descriptorMsgs env_sub submittedItem
-    --   if isResolved targetMsgs && !(isResolved submittedMsgs) then
-    --     regressions := regressions.push <| Json.mkObj [
-    --       ("name", Json.str targetCi.name.toString),
-    --       ("target_messages", msgsToJson targetMsgs),
-    --       ("submission_messages", msgsToJson submittedMsgs)
-    --     ]
-
-    -- if regressions.size > 0 then
-    --   let diagnostics := Json.mkObj [
-    --     ("summary", Json.str "Resolved targets regressed to unresolved status."),
-    --     ("rule", Json.str "A tagged declaration that is resolved in the target must remain resolved in the submission."),
-    --     ("regressions", Json.arr regressions)
-    --   ]
-    --   throw <| IO.userError s!"Resolved target regression detected.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
-    -- IO.println "Checked no resolved target regressions"
-
-
-    -- axiom regression: target had no disallowed and no sorry, but submission had either
-
-    let mut regressions : Array Json := #[]
-    for n in taggedNames do
-      let targetInfo? := targetInfos.find? (fun info => info.name == n)
-      let submittedInfo? := submittedInfos.find? (fun info => info.name == n)
-      match (targetInfo?, submittedInfo?) with
-      | (some targetInfo, some submittedInfo) =>
-        let targetResolvedAxiomUsage := targetInfo.axioms.all (fun ax => AllowedAxioms.contains ax)
-        let submittedResolvedAxiomUsage := submittedInfo.axioms.all (fun ax => AllowedAxioms.contains ax)
-        if targetResolvedAxiomUsage && !submittedResolvedAxiomUsage then
-          regressions := regressions.push <| Json.mkObj [
-            ("name", Json.str n.toString),
-            ("target_axioms", Json.arr <| targetInfo.axioms.map (fun a => Json.str a.toString)),
-            ("submission_axioms", Json.arr <| submittedInfo.axioms.map (fun a => Json.str a.toString))
+          let allow_sorry? := target.ci.name ∈ tagged_decl_names && (`sorryAx ∈ target.axioms)
+          -- we allow sorry axiom only on marked targets, where the target itself relies on sorry
+          axiomMap := axiomMap.insert target.ci.name (← checkAxioms env' target.ci.name allow_sorry?)
+        else
+          throw <| diagnosticErrorMessage s!"Missing declaration in attempted contribution." <| Json.mkObj [
+            ("summary", Json.str s!"A declaration in the current file version was not found in the attempted contribution. Please ensure that all declarations in the current file version are still included in the your contribution (i.e. no deletions are allowed)."),
+            ("offending declaration", Json.str s!"Declaration {target.ci.name} was found in the current file version, but no declaration with this name was found in the attempted contribution.")
           ]
-      | _ =>
-        let targetInfos := targetInfos.map (fun info => info.name)
-        let submittedInfos := submittedInfos.map (fun info => info.name)
-        throw <| IO.userError s!"Internal error: missing tagged declaration {n} in safeVerify outputs.\nTarget infos: {targetInfos}\nSubmitted infos: {submittedInfos}"
-
-    if regressions.size > 0 then
-      let diagnostics := Json.mkObj [
-        ("summary", Json.str "Resolved targets regressed to unresolved status after safeVerify."),
-        ("rule", Json.str "A tagged declaration resolved in target must not reintroduce disallowed axioms in submission."),
-        ("regressions", Json.arr regressions)
-      ]
-      throw <| IO.userError s!"Resolved target regression detected.\n<AGORA_DIAGNOSTICS>\n{diagnostics.pretty}\n</AGORA_DIAGNOSTICS>"
-    IO.println "Checked no resolved target regressions (post-safeVerify)"
 
 
+  -- if we got here, we haven't failed! So now fill in contents and context and axioms!
+  let trueSourceFile ← findLean mod
+  let source ← IO.FS.readFile trueSourceFile
+  let fileMap := FileMap.ofString source
+  let output ← ret.mapM (fun (desc, rng) => do
+    let axioms ← match axiomMap.get? desc.ci.name with
+      | some a => pure a
+      | none => checkAxioms env' desc.ci.name desc.target?
+    pure {desc with
+      contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos),
+      context := Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos),
+      axioms := axioms,
+      resolved? := axioms.all (fun a => a ∈ AllowedAxioms) -- we consider a declaration resolved if it relies only on allowed axioms, meaning it doesn't rely on sorry or any disallowed axioms
+    })
+
+  return output.toList
 
 
+unsafe def getTargets' (submission_module : Name) (target_module : Option Name := none) (source_file : Option System.FilePath := none): IO FileDescriptor := do
 
-    IO.println s!"Finished with no errors; building file descriptor."
 
-    let toDeclDescriptor (item : (CompilationStep × ConstantInfo × Bool)) : IO DeclarationDescriptor := do
-      let (cs, ci, is_tagged) := item
-      let msgs ← descriptorMsgs env_sub item
-      return  {
-        ci := ci,
-        contents := cs.src,
-        context := (Substring.mk cs.src.str 0 cs.src.startPos),
-        msgs? := some msgs,
-        target? := is_tagged,
-        sourceFile? := source_file
-      }
+  let targetDescriptor ← getDescriptorForModule (target_module.getD submission_module) (sourceFile? := source_file)
+  let submittedDescriptor ← getDescriptorForModule submission_module targetDescriptor (sourceFile? := source_file)
+  return submittedDescriptor
 
-    let target_final : List DeclarationDescriptor ← targetData.mapM toDeclDescriptor
-    let submitted_final : List DeclarationDescriptor ← submittedData.mapM toDeclDescriptor
-
-    let outputs := if diff? then
-      let diffs := submitted_final.filter (fun d => not (target_final.contains d))
-      diffs
-    else
-      submitted_final
-
-    return outputs
-    -- throw <| IO.userError s!"safeVerify not yet implemented"
-
-  | _ =>
-    throw <| IO.userError s!"Could not get final environment from submission/target."
 
 
 unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   searchPathRef.set compile_time_search_path%
+  enableInitializersExecution
 
   let submission := args.flag! "submission" |>.as! String
   let target := args.flag! "target" |>.as! String
@@ -315,91 +148,43 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   let savePath := args.flag! "save" |>.as! String
   let save? := if savePath == "" then none else some savePath
 
-  let diff := args.flag! "diff" |>.as! String
-  let diff? := if diff != "true" then false else true
-
   try
     let targetContent? ← target?.mapM (fun t => getFileOrModuleContents t)
 
-    let (targetContent?, _, target_fp?) := match targetContent? with
+    let (_, target_mod?, fp?) := match targetContent? with
       | some (c, m, fp) => (some c, some m, some fp)
       | none => (none, none, none)
 
-    match submission.toNat? with
-    | some n =>
-      -- buffer mode
-      let payload_raw : ByteArray ← (← getStdin).read n.toUSize
-      let payload_str? := String.fromUTF8? payload_raw
-      match payload_str? with
-      | none =>
-        IO.eprintln "Error: could not decode stdin as UTF-8"
-      | some payload => do
-        let descriptor ← getTargets' payload targetContent? diff? target_fp?
-        let json := ToJson.toJson descriptor.toArray
-        if save?.isSome then
-          let _ ← IO.FS.writeFile save?.get! (json.pretty)
-          IO.println s!"Wrote file descriptor to {save?.get!}"
-        else
-          IO.println "<DESCRIPTOR>"
-          IO.println json.pretty
-          IO.println "</DESCRIPTOR>"
 
-    | none =>
-      -- file mode
-      let (contents,_, fp) ← getFileOrModuleContents submission
-      let descriptor ← getTargets' contents targetContent? diff? (some fp)
-      let json := ToJson.toJson descriptor
-      if save?.isSome then
-          let _ ← IO.FS.writeFile save?.get! (json.pretty)
-          IO.println s!"Wrote file descriptor to {save?.get!}"
-      else
-        IO.println "<DESCRIPTOR>"
-        IO.println json.pretty
-        IO.println "</DESCRIPTOR>"
+    let (_,sub_mod, _) ← getFileOrModuleContents submission
+    let descriptor ← getTargets' sub_mod target_mod? fp?
+    let json := ToJson.toJson descriptor
+    if save?.isSome then
+        let _ ← IO.FS.writeFile save?.get! (json.pretty)
+        IO.println s!"Wrote file descriptor to {save?.get!}"
+    else
+      IO.println "<DESCRIPTOR>"
+      IO.println json.pretty
+      IO.println "</DESCRIPTOR>"
 
-      IO.println "Finished with no errors."
+    IO.println "Finished with no errors."
     return 0
   catch e =>
     IO.eprintln s!"Error: {e}"
     return 1
 
 
-
-/-
-
-File mode:
---submission <file>
---target <file> (optional)
-
-buffer mode:
---submission <bytes in buffer>
---target <file> (optional)
-
-
-
-additional flags:
-
---save <file> (optional) : if provided, save the file descriptor to this file as json to specified path.
---diff : if provided (and target file is specified), output the diff of the file descriptor instead of the full thing.
-
-
--/
-
 unsafe def getTargets : Cmd := `[Cli|
   get_targets VIA getTargetsCLI; ["0.0.1"]
 "Get targets from a string."
 
   FLAGS:
-    submission : String; "In file mode, the submission module name. In buffer mode, the number of bytes to read from stdin."
+    submission : String; "In file mode, the submission module name."
     target : String; "The target module name. Optional; if not provided, then target=submission is assumed."
-
     save : String; "If provided, save the file descriptor to this file as json to specified path. Default is no save."
-    diff : String; "If provided (and target file is specified), output the diff of the file descriptor instead of the full thing. Default is false."
-
-
 
   EXTENSIONS:
-    defaultValues! #[("target", ""), ("save", ""), ("diff", "false")]
+    defaultValues! #[("target", ""), ("save", "")]
 ]
 
 

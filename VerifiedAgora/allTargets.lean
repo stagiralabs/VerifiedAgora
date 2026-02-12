@@ -6,17 +6,6 @@ import VerifiedAgora.Utils
 open Lean Core Elab IO Meta Term Command Tactic Cli
 
 
-def toDeclDescriptor (ci : ConstantInfo) (source : FileMap) (range : DeclarationRange)  (msgs? : Option (List (MessageSeverity × String))) (target? : Bool) (sourceFile? : Option System.FilePath) : DeclarationDescriptor :=
-    {
-      ci := ci,
-      contents := Substring.mk source.source (source.ofPosition range.pos) (source.ofPosition range.endPos),
-      target? := target?,
-      sourceFile? := sourceFile?
-      context := Substring.mk source.source ⟨0⟩ (source.ofPosition range.pos),
-      msgs? := msgs?
-    }
-
-
 
 /-- Imports the entire project (in the way `lake build` would) and gets all tagged declarations. Requires project to be `lake build`-ed first. -/
 unsafe def getAllTargetsInProject (mod : Name) : IO FileDescriptor := do
@@ -31,13 +20,25 @@ unsafe def getAllTargetsInProject (mod : Name) : IO FileDescriptor := do
     let modidx := env.getModuleIdxFor? decl.name
     let mod := env.header.moduleNames.get! modidx.get!
     let fp ← findLean mod
-    let source ← IO.FS.readFile fp
+    let source := FileMap.ofString (← IO.FS.readFile fp)
     let location := declRangeExt.find? (env) decl.name |>.getD ⟨default, default⟩
+    let range := location.range
+    let contents := Substring.mk source.source (source.ofPosition range.pos) (source.ofPosition range.endPos)
+    let context := Substring.mk source.source ⟨0⟩ (source.ofPosition range.pos)
 
-    let (_, _, syntheticMsgs) := axiomAudit env decl.name
+    let axioms ← checkAxioms env decl.name true
+    let resolved? := axioms.all (fun a => a ∈ AllowedAxioms)
 
 
-    out := (toDeclDescriptor decl (FileMap.ofString source) location.range (some syntheticMsgs) true (some fp)) :: out
+    out := {
+      ci := decl,
+      contents := contents,
+      context := context,
+      axioms := axioms,
+      target? := true,
+      resolved? := resolved?,
+      sourceFile? := some fp
+    } :: out
 
   return out
 

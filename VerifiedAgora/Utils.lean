@@ -7,6 +7,9 @@ open Lean Core Elab IO Meta Term Command Tactic Cli
 
 
 
+def diagnosticErrorMessage (label : String) (data : Json) : Error :=
+  IO.userError s!"{label}\n<AGORA_DIAGNOSTICS>\n{data.pretty}\n</AGORA_DIAGNOSTICS>"
+
 
 def getFileOrModuleContents (name : String) : IO (String × Name × System.FilePath) := do
     --first attempt as module name
@@ -58,34 +61,39 @@ def Lean.ConstantInfo.kind : ConstantInfo → String
 def AllowedAxioms := [`propext, `Quot.sound, `Classical.choice]
 def TargetsAllowedAxioms := AllowedAxioms ++ [`sorryAx]
 
-def checkAxioms (env: Environment) (n: Name) (allow_sorry? : Bool := false): IO Unit:= do
+def checkAxioms (env: Environment) (n: Name) (allow_sorry? : Bool := false) : IO (Array Name):= do
   let (_,s):=(CollectAxioms.collect n).run env |>.run {}
   for a in s.axioms do
     let ax := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
     if a ∉ ax then
-      throw <| IO.userError s!"{a} is not in the allowed set of standard axioms ({n})"
+      throw <| diagnosticErrorMessage s!"Declaration relies on disallowed axiom." <| Json.mkObj [
+        ("summary", Json.str s!"A declaration in the attempted contribution relies on a disallowed axiom. Remember, standard declarations must only rely on the allowed set of standard axioms ({String.intercalate ", " (AllowedAxioms.map Name.toString)}) for Agora contributions. Declarations tagged as targets are allowed to additionally rely on \"sorryAx\", but only if the previous proof of said target also relied on \"sorryAx\" - meaning that contributions cannot regress already resolved targets to once again be unresolved."),
+        ("offending axiom", Json.str s!"Declaration {n} relies on axiom {a}, which is not in its allowed set of axioms ({String.intercalate ", " (ax.map Name.toString)})")
+      ]
+      -- throw <| IO.userError s!"{a} is not in the allowed set of standard axioms ({n})"
+  return s.axioms
 
-/-- Returns `(usesSorry, disallowedAxioms, syntheticMsgs)` for declaration `n` in `env`.
-Synthetic messages classify `sorryAx` as warning and disallowed axioms as error. -/
-def axiomAudit (env : Environment) (n : Name) :
-    (Bool × Array Name × List (MessageSeverity × String)) := Id.run do
-  let (_, s) := (CollectAxioms.collect n).run env |>.run {}
-  let axioms := s.axioms
+-- /-- Returns `(usesSorry, disallowedAxioms, syntheticMsgs)` for declaration `n` in `env`.
+-- Synthetic messages classify `sorryAx` as warning and disallowed axioms as error. -/
+-- def axiomAudit (env : Environment) (n : Name) :
+--     (Bool × Array Name × List (MessageSeverity × String)) := Id.run do
+--   let (_, s) := (CollectAxioms.collect n).run env |>.run {}
+--   let axioms := s.axioms
 
-  let usesSorry := axioms.contains `sorryAx
-  let disallowed := axioms.filter (fun a => a ∉ TargetsAllowedAxioms)
+--   let usesSorry := axioms.contains `sorryAx
+--   let disallowed := axioms.filter (fun a => a ∉ TargetsAllowedAxioms)
 
-  let mut msgs : List (MessageSeverity × String) := []
-  if usesSorry then
-    msgs := msgs ++ [(MessageSeverity.warning, "[Agora Warning] relies on sorryAx")]
+--   let mut msgs : List (MessageSeverity × String) := []
+--   if usesSorry then
+--     msgs := msgs ++ [(MessageSeverity.warning, "[Agora Warning] relies on sorryAx")]
 
-  if disallowed.size > 0 then
-    msgs := msgs ++ [(
-      MessageSeverity.error,
-      s!"[Agora Error] relies on disallowed axioms: {String.intercalate ", " (disallowed.toList.map Name.toString)}"
-    )]
+--   if disallowed.size > 0 then
+--     msgs := msgs ++ [(
+--       MessageSeverity.error,
+--       s!"[Agora Error] relies on disallowed axioms: {String.intercalate ", " (disallowed.toList.map Name.toString)}"
+--     )]
 
-  (usesSorry, disallowed, msgs)
+--   (usesSorry, disallowed, msgs)
 
 /-- Removes duplicate `(severity, message)` pairs while preserving order. -/
 def dedupMessages (msgs : List (MessageSeverity × String)) : List (MessageSeverity × String) :=
@@ -132,8 +140,10 @@ structure DeclarationDescriptor where
   ci : ConstantInfo
   contents : Substring
   context : Substring
-  msgs? : Option (List (MessageSeverity × String))
+  -- msgs? : Option (List (MessageSeverity × String))
+  axioms : Array Name
   target? : Bool
+  resolved? : Bool
   sourceFile? : Option System.FilePath
 
 
@@ -144,7 +154,7 @@ instance: BEq DeclarationDescriptor where
     d1.ci.kind == d2.ci.kind &&
     d1.sourceFile? == d2.sourceFile? &&
     d1.target? == d2.target? &&
-    d1.msgs? == d2.msgs? &&
+    d1.axioms == d2.axioms &&
     d1.contents == d2.contents &&
     d1.context == d2.context
 
@@ -160,12 +170,14 @@ def DeclarationDescriptor.toJson (desc : DeclarationDescriptor) : Json :=
       )
     ),
     ("contents", Json.str desc.contents.toString),
-    ("isTarget", Json.bool desc.target?),
+    ("target?", Json.bool desc.target?),
     ("context", Json.str desc.context.toString),
-    ("msgs", match desc.msgs? with
-      | some msgs => Json.arr <| msgs.toArray.map (fun (sev, data) => Json.mkObj [("severity", (ToJson.toJson sev)), ("data", Json.str data)])
-      | none => Json.str "<unable to extract messages>"
-    )
+    -- ("msgs", match desc.msgs? with
+    --   | some msgs => Json.arr <| msgs.toArray.map (fun (sev, data) => Json.mkObj [("severity", (ToJson.toJson sev)), ("data", Json.str data)])
+    --   | none => Json.str "<unable to extract messages>"
+    -- )
+    ("resolved?", Json.bool desc.resolved?),
+    ("axioms", Json.arr <| desc.axioms.map (fun ax => Json.str ax.toString))
   ]
 
 
