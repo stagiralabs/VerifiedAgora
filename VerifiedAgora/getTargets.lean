@@ -70,6 +70,7 @@ def getDescriptorForModule (mod : Name) (targetDescriptor? : Option FileDescript
         },rng)
 
   let mut axiomMap : Std.HashMap Name (Array Name) := {}
+  let baselineMode := (targetDescriptor?.isNone)
   let exprPrinter (e : Expr) := printExpr e env'
 
   if (targetDescriptor?.getD []).length > 0 then
@@ -99,8 +100,12 @@ def getDescriptorForModule (mod : Name) (targetDescriptor? : Option FileDescript
                 ("offending declaration", Json.str <| s!"Definition {target.ci.name} has type:\n\n \"{← exprPrinter ci'.type}\" \n\nin the attempted contribution, and is expected to have type \n\n \"{← exprPrinter target.ci.type}\"" ++ valStr)
               ]
 
-          let allow_sorry? := target.ci.name ∈ tagged_decl_names && (`sorryAx ∈ target.axioms)
-          -- we allow sorry axiom only on marked targets, where the target itself relies on sorry
+          let allow_sorry? := (`sorryAx ∈ target.axioms)
+          -- Preserve baseline axiom status for existing declarations:
+          -- if the target descriptor previously depended on sorryAx, allow that
+          -- dependency in the submitted descriptor as well. This prevents
+          -- unrelated pre-existing unresolved declarations from blocking
+          -- verification of a focused contribution.
           axiomMap := axiomMap.insert target.ci.name (← checkAxioms env' target.ci.name allow_sorry?)
         else
           throw <| diagnosticErrorMessage s!"Missing declaration in attempted contribution." <| Json.mkObj [
@@ -116,10 +121,15 @@ def getDescriptorForModule (mod : Name) (targetDescriptor? : Option FileDescript
   let output ← ret.mapM (fun (desc, rng) => do
     let axioms ← match axiomMap.get? desc.ci.name with
       | some a => pure a
-      | none => checkAxioms env' desc.ci.name desc.target?
+      | none => checkAxioms env' desc.ci.name (if baselineMode then true else desc.target?)
+    let emitSourceContext := desc.target?
     pure {desc with
-      contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos),
-      context := Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos),
+      contents := if emitSourceContext
+        then Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos)
+        else default,
+      context := if emitSourceContext
+        then Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos)
+        else default,
       axioms := axioms,
       resolved? := axioms.all (fun a => a ∈ AllowedAxioms) -- we consider a declaration resolved if it relies only on allowed axioms, meaning it doesn't rely on sorry or any disallowed axioms
     })
