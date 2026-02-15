@@ -251,27 +251,21 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
 
 unsafe def getTargets' (timingsRef : IO.Ref TimingState)
     (submission_module : Name)
-    (target_module : Option Name := none)
-    (submission_source_file : Option System.FilePath := none)
-    (target_source_file : Option System.FilePath := none) : IO FileDescriptor := do
+    (target_module : Option Name := none) : IO FileDescriptor := do
   let effectiveTarget := target_module.getD submission_module
-  let submissionSourceFile ← match submission_source_file with
-    | some fp => pure fp
-    | none => findLean submission_module
+  let submissionSourceFile ← findLean submission_module
 
   let targetSourceFile ←
     if effectiveTarget == submission_module then
       pure submissionSourceFile
     else
-      match target_source_file with
-      | some fp => pure fp
-      | none => findLean effectiveTarget
+      findLean effectiveTarget
 
   if effectiveTarget == submission_module then
     getDescriptorForModule timingsRef submission_module (sourceFile? := some submissionSourceFile)
   else
     let targetDescriptor ← getDescriptorForModule timingsRef effectiveTarget (sourceFile? := some targetSourceFile)
-    let submittedDescriptor ← getDescriptorForModule timingsRef submission_module targetDescriptor (sourceFile? := some targetSourceFile)
+    let submittedDescriptor ← getDescriptorForModule timingsRef submission_module targetDescriptor (sourceFile? := some submissionSourceFile)
     return submittedDescriptor
 
 
@@ -297,14 +291,14 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
     let targetContent? ← withTiming timingsRef "cli.resolveTargetInput" <| do
       target?.mapM (fun t => getFileOrModuleContents t)
 
-    let (_, target_mod?, target_fp?) := match targetContent? with
-      | some (c, m, fp) => (some c, some m, some fp)
-      | none => (none, none, none)
+    let target_mod? := match targetContent? with
+      | some (_, m, _) => some m
+      | none => none
 
 
-    let (_, sub_mod, sub_fp) ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
+    let (_, sub_mod, _) ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
       getFileOrModuleContents submission
-    let descriptor ← getTargets' timingsRef sub_mod target_mod? (submission_source_file := some sub_fp) (target_source_file := target_fp?)
+    let descriptor ← getTargets' timingsRef sub_mod target_mod?
     let json ← withTiming timingsRef "cli.encodeDescriptorJson" <| do
       pure (ToJson.toJson descriptor)
     if save?.isSome then
@@ -318,11 +312,11 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
 
     printTimingSummary timingsRef
     IO.println "Finished with no errors."
-    return 0
+    return (0 : UInt32)
   catch e =>
     printTimingSummary timingsRef
     IO.eprintln s!"Error: {e}"
-    return 1
+    return (1 : UInt32)
 
 
 unsafe def getTargets : Cmd := `[Cli|
