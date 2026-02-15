@@ -91,21 +91,22 @@ def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap N
   | some x => pure x
   | none => pure {}
 
-
-def getConstantsInModule (env : Environment) (mod : Name): IO (Std.HashMap Name ConstantInfo) := do
-  let modIdx? : Option ModuleIdx := env.getModuleIdx? mod
-  let mut ciMap : Std.HashMap Name ConstantInfo := {}
-  for (n,ci) in env.constants  do
-    let ownedByModule := match modIdx?, env.getModuleIdxFor? n with
-      | some modIdx, some declIdx => modIdx == declIdx
-      | _, _ => false
-    if ownedByModule then
-      ciMap := ciMap.insert n ci
-  pure ciMap
-
 def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targetDescriptor? : Option FileDescriptor := none) (sourceFile? : Option System.FilePath := none) : IO FileDescriptor := do
 
   let modStr := mod.toString
+
+  let (moduleData, _) ← withTiming timingsRef s!"descriptor.readModuleData[{modStr}]" <| do
+    readModuleData (← findOLean mod)
+  let env ← withTiming timingsRef s!"descriptor.importDependencies[{modStr}]" <| do
+    importModules moduleData.imports {} 0
+  -- IO.println s!"Imported module data."
+
+  let mut env' ← withTiming timingsRef s!"descriptor.replayConstants[{modStr}]" <| do
+    let mut newConstants := {}
+    for name in moduleData.constNames, ci in moduleData.constants do
+      newConstants := newConstants.insert name ci
+    env.replay newConstants
+  -- IO.println s!"Replayed constants."
 
   let (env'', tagged_decl_names) ← withTiming timingsRef s!"descriptor.loadTaggedDecls[{modStr}]" <| do
     let env'' ← importModules #[{ module := mod }] {} 0
@@ -119,20 +120,29 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     let tagged_decl_names : Std.HashSet Name := tagged_decls.foldl (fun s ci => s.insert ci.name) {}
     pure (env'', tagged_decl_names)
 
-  let constants_in_mod ← getConstantsInModule env'' mod
-
   let ciMap ← withTiming timingsRef s!"descriptor.buildModuleConstMap[{modStr}]" <| do
     let mut ciMap : Std.HashMap Name ConstantInfo := {}
-    for (n,ci) in constants_in_mod  do
+    for (n,ci) in env'.constants.map₂  do
       ciMap := ciMap.insert n ci
     pure ciMap
 
   let (scanCandidates, namesForHumanScan) ← withTiming timingsRef s!"descriptor.scanDeclarations[{modStr}]" <| do
     let mut scanCandidates : Array (Name × ConstantInfo) := #[]
     let mut namesForHumanScan : Array Name := #[]
-    for (n,ci) in constants_in_mod  do
+    for (n,ci) in env'.constants.map₂  do
       -- IO.println s!"Processing declaration {n} of kind {ci.kind}..."
       if ci.kind ∈ ["theorem", "def"] then
+        if let .defnInfo dv := ci then
+          if dv.safety != .safe then
+            let str_safety := match dv.safety with
+              | .safe => "safe"
+              | .unsafe => "unsafe"
+              | .partial => "partial"
+            throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
+              ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
+              ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
+              ]
+
         scanCandidates := scanCandidates.push (n, ci)
         namesForHumanScan := namesForHumanScan.push n
     for target in targetDescriptor?.getD [] do
@@ -148,20 +158,6 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
 
   let humanDeclMap ← withTiming timingsRef s!"descriptor.batchHumanDeclScan[{modStr}]" <| do
     batchHumanDecls namesForHumanScan env''
-
-  withTiming timingsRef s!"descriptor.validateHumanDeclSafety[{modStr}]" <| do
-    for (n, ci) in scanCandidates do
-      if (humanDeclMap.get? n).isSome then
-        if let .defnInfo dv := ci then
-          if dv.safety != .safe then
-            let str_safety := match dv.safety with
-              | .safe => "safe"
-              | .unsafe => "unsafe"
-              | .partial => "partial"
-            throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
-              ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
-              ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
-              ]
 
   let mut ret : Array (DeclarationDescriptor × DeclarationRanges) ← withTiming timingsRef s!"descriptor.buildDescriptorSeed[{modStr}]" <| do
     let mut ret : Array (DeclarationDescriptor × DeclarationRanges) := #[]
@@ -180,9 +176,9 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
 
   let mut axiomMap : Std.HashMap Name (Array Name) ← withTiming timingsRef s!"descriptor.precomputeAxioms[{modStr}]" <| do
     let names := ret.map (fun (desc, _) => desc.ci.name)
-    return collectAxiomsBatched env'' names
+    return collectAxiomsBatched env' names
 
-  let exprPrinter (e : Expr) := printExpr e env''
+  let exprPrinter (e : Expr) := printExpr e env'
 
   if (targetDescriptor?.getD []).length > 0 then
     axiomMap ← withTiming timingsRef s!"descriptor.compareAgainstTarget[{modStr}]" <| do
@@ -218,7 +214,7 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
             let (axioms, axiomMap') := match axiomMap.get? target.ci.name with
               | some axioms => (axioms, axiomMap)
               | none =>
-                let axioms := collectAxiomsRaw env'' target.ci.name
+                let axioms := collectAxiomsRaw env' target.ci.name
                 (axioms, axiomMap.insert target.ci.name axioms)
             axiomMap := axiomMap'
             validateCollectedAxioms target.ci.name axioms allow_sorry?
@@ -238,7 +234,7 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     ret.mapM (fun (desc, rng) => do
       let axioms := match axiomMap.get? desc.ci.name with
         | some a => a
-        | none => collectAxiomsRaw env'' desc.ci.name
+        | none => collectAxiomsRaw env' desc.ci.name
       validateCollectedAxioms desc.ci.name axioms desc.target?
       pure {desc with
         contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos),
@@ -248,6 +244,7 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
       })
 
   return output.toList
+
 
 unsafe def getTargets' (timingsRef : IO.Ref TimingState)
     (submission_module : Name)

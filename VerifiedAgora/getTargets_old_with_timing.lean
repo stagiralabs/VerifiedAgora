@@ -3,8 +3,7 @@ import VerifiedAgora.tagger
 import VerifiedAgora.Frontend
 import VerifiedAgora.TacticInvocation
 import VerifiedAgora.Utils
-import VerifiedAgora.CollectAxiomsBatched
-open Lean Core Elab IO Meta Term Command Tactic Cli Environment CollectAxiomsBatched
+open Lean Core Elab IO Meta Term Command Tactic Cli Environment
 
 structure TimingStats where
   totalMs : Nat := 0
@@ -58,100 +57,52 @@ def printExpr (ex : Expr) (env : Environment) : IO Format := do
   let ctx:={fileName:="", fileMap:=default}
   Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ex) ctx {env:=env})
 
-def collectAxiomsRaw (env : Environment) (n : Name) : Array Name :=
-  let (_, s) := (CollectAxioms.collect n).run env |>.run {}
-  s.axioms
-
-def validateCollectedAxioms (n : Name) (axioms : Array Name) (allow_sorry? : Bool := false) : IO Unit := do
-  let allowedAxioms := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
-  for a in axioms do
-    if a ∉ allowedAxioms then
-      throw <| diagnosticErrorMessage s!"Declaration relies on disallowed axiom." <| Json.mkObj [
-        ("summary", Json.str s!"A declaration in the attempted contribution relies on a disallowed axiom. Remember, standard declarations must only rely on the allowed set of standard axioms ({String.intercalate ", " (AllowedAxioms.map Name.toString)}) for Agora contributions. Declarations tagged as targets are allowed to additionally rely on \"sorryAx\", but only if the previous proof of said target also relied on \"sorryAx\" - meaning that contributions cannot regress already resolved targets to once again be unresolved."),
-        ("offending axiom", Json.str s!"Declaration {n} relies on axiom {a}, which is not in its allowed set of axioms ({String.intercalate ", " (allowedAxioms.map Name.toString)})")
-      ]
-
-def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap Name DeclarationRanges) := do
+def isHumanDecl (name : Name) (env : Environment) : IO (Option DeclarationRanges) := do
   let ctx := {fileName:="", fileMap:=default}
   let state : Core.State := {env := env}
-  let fn : CoreM (Std.HashMap Name DeclarationRanges) := do
-    let mut out : Std.HashMap Name DeclarationRanges := {}
-    for name in names do
-      let hasDeclRange := (← Lean.findDeclarationRanges? name)
-      let notProjFn := !(← Lean.isProjectionFn name)
-      match (hasDeclRange, notProjFn) with
-      | (some rng, true) =>
-        out := out.insert name rng
-      | _ =>
-        pure ()
-    return out
+  let fn : CoreM (Option DeclarationRanges) := do
+    let hasDeclRange := (← Lean.findDeclarationRanges? name)
+    let notProjFn := !(← Lean.isProjectionFn name)
+
+    match (hasDeclRange, notProjFn) with
+    | (some rng, true) => return (some rng)
+    | _ => return none
 
   let result? ← CoreM.run' fn ctx state |>.toIO'
   match result?.toOption with
   | some x => pure x
-  | none => pure {}
-
-
-def getConstantsInModule (env : Environment) (mod : Name): IO (Std.HashMap Name ConstantInfo) := do
-  let modIdx? : Option ModuleIdx := env.getModuleIdx? mod
-  let mut ciMap : Std.HashMap Name ConstantInfo := {}
-  for (n,ci) in env.constants  do
-    let ownedByModule := match modIdx?, env.getModuleIdxFor? n with
-      | some modIdx, some declIdx => modIdx == declIdx
-      | _, _ => false
-    if ownedByModule then
-      ciMap := ciMap.insert n ci
-  pure ciMap
+  | none => pure none
 
 def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targetDescriptor? : Option FileDescriptor := none) (sourceFile? : Option System.FilePath := none) : IO FileDescriptor := do
 
   let modStr := mod.toString
 
+  let (moduleData, _) ← withTiming timingsRef s!"descriptor.readModuleData[{modStr}]" <| do
+    readModuleData (← findOLean mod)
+  let env ← withTiming timingsRef s!"descriptor.importDependencies[{modStr}]" <| do
+    importModules moduleData.imports {} 0
+  -- IO.println s!"Imported module data."
+
+  let mut env' ← withTiming timingsRef s!"descriptor.replayConstants[{modStr}]" <| do
+    let mut newConstants := {}
+    for name in moduleData.constNames, ci in moduleData.constants do
+      newConstants := newConstants.insert name ci
+    env.replay newConstants
+  -- IO.println s!"Replayed constants."
+
   let (env'', tagged_decl_names) ← withTiming timingsRef s!"descriptor.loadTaggedDecls[{modStr}]" <| do
     let env'' ← importModules #[{ module := mod }] {} 0
-    let modIdx? : Option ModuleIdx := env''.getModuleIdx? mod
-    let tagged_decls := env''.constants.fold (fun acc k ci =>
-      let ownedByModule := match modIdx?, env''.getModuleIdxFor? k with
-        | some modIdx, some declIdx => modIdx == declIdx
-        | _, _ => false
-      if ownedByModule && TagAttribute.hasTag targetAttribute env'' k then ci::acc else acc
-    ) []
+    let tagged_decls := env''.constants.fold (fun acc k ci => if TagAttribute.hasTag targetAttribute env'' k then ci::acc else acc) []
     let tagged_decl_names : Std.HashSet Name := tagged_decls.foldl (fun s ci => s.insert ci.name) {}
+    IO.println s!"Found {tagged_decls.length} tagged declarations in the environment."
     pure (env'', tagged_decl_names)
 
-  let constants_in_mod ← getConstantsInModule env'' mod
 
-  let ciMap ← withTiming timingsRef s!"descriptor.buildModuleConstMap[{modStr}]" <| do
-    let mut ciMap : Std.HashMap Name ConstantInfo := {}
-    for (n,ci) in constants_in_mod  do
-      ciMap := ciMap.insert n ci
-    pure ciMap
-
-  let (scanCandidates, namesForHumanScan) ← withTiming timingsRef s!"descriptor.scanDeclarations[{modStr}]" <| do
-    let mut scanCandidates : Array (Name × ConstantInfo) := #[]
-    let mut namesForHumanScan : Array Name := #[]
-    for (n,ci) in constants_in_mod  do
+  let mut ret : Array (DeclarationDescriptor × DeclarationRanges) ← withTiming timingsRef s!"descriptor.scanDeclarations[{modStr}]" <| do
+    let mut ret : Array (DeclarationDescriptor × DeclarationRanges) := #[]
+    for (n,ci) in env'.constants.map₂  do
       -- IO.println s!"Processing declaration {n} of kind {ci.kind}..."
       if ci.kind ∈ ["theorem", "def"] then
-        scanCandidates := scanCandidates.push (n, ci)
-        namesForHumanScan := namesForHumanScan.push n
-    for target in targetDescriptor?.getD [] do
-      namesForHumanScan := namesForHumanScan.push target.ci.name
-
-    let mut dedupNames : Array Name := #[]
-    let mut seenNames : Std.HashSet Name := {}
-    for n in namesForHumanScan do
-      if n ∉ seenNames then
-        seenNames := seenNames.insert n
-        dedupNames := dedupNames.push n
-    pure (scanCandidates, dedupNames)
-
-  let humanDeclMap ← withTiming timingsRef s!"descriptor.batchHumanDeclScan[{modStr}]" <| do
-    batchHumanDecls namesForHumanScan env''
-
-  withTiming timingsRef s!"descriptor.validateHumanDeclSafety[{modStr}]" <| do
-    for (n, ci) in scanCandidates do
-      if (humanDeclMap.get? n).isSome then
         if let .defnInfo dv := ci then
           if dv.safety != .safe then
             let str_safety := match dv.safety with
@@ -163,33 +114,27 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
               ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
               ]
 
-  let mut ret : Array (DeclarationDescriptor × DeclarationRanges) ← withTiming timingsRef s!"descriptor.buildDescriptorSeed[{modStr}]" <| do
-    let mut ret : Array (DeclarationDescriptor × DeclarationRanges) := #[]
-    for (n, ci) in scanCandidates do
-      if let some rng := humanDeclMap.get? n then
-        ret := ret.push ({
-          ci := ci,
-          contents := default, -- we fill this in later since we need the file map for it
-          context := default, -- we fill this in later since we need the file map for it
-          target? := tagged_decl_names.contains n,
-          sourceFile? := sourceFile?,
-          axioms := default, -- we fill this in later when we do regression and axiom checking
-          resolved? := default -- same
-        }, rng)
+        if let some rng ← isHumanDecl n env'' then
+          ret := ret.push ({
+            ci := ci,
+            contents := default, -- we fill this in later since we need the file map for it
+            context := default, -- we fill this in later since we need the file map for it
+            target? := tagged_decl_names.contains n,
+            sourceFile? := sourceFile?,
+            axioms := default, -- we fill this in later when we do regression and axiom checking
+            resolved? := default -- same
+          }, rng)
     pure ret
 
-  let mut axiomMap : Std.HashMap Name (Array Name) ← withTiming timingsRef s!"descriptor.precomputeAxioms[{modStr}]" <| do
-    let names := ret.map (fun (desc, _) => desc.ci.name)
-    return collectAxiomsBatched env'' names
-
-  let exprPrinter (e : Expr) := printExpr e env''
+  let mut axiomMap : Std.HashMap Name (Array Name) := {}
+  let exprPrinter (e : Expr) := printExpr e env'
 
   if (targetDescriptor?.getD []).length > 0 then
     axiomMap ← withTiming timingsRef s!"descriptor.compareAgainstTarget[{modStr}]" <| do
       let mut axiomMap := axiomMap
       for target in targetDescriptor?.getD [] do
-        if (humanDeclMap.get? target.ci.name).isSome then
-          if let some ci' := ciMap.get? target.ci.name then
+        if (← isHumanDecl target.ci.name env'').isSome then
+          if let some ci' := env'.constants.map₂.find? target.ci.name then
             if target.ci.kind ≠ ci'.kind then
               throw <| diagnosticErrorMessage s!"Declaration kind mismatch between current and attempted contribution" <|
               Json.mkObj [
@@ -215,13 +160,7 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
 
             let allow_sorry? := target.ci.name ∈ tagged_decl_names && (`sorryAx ∈ target.axioms)
             -- we allow sorry axiom only on marked targets, where the target itself relies on sorry
-            let (axioms, axiomMap') := match axiomMap.get? target.ci.name with
-              | some axioms => (axioms, axiomMap)
-              | none =>
-                let axioms := collectAxiomsRaw env'' target.ci.name
-                (axioms, axiomMap.insert target.ci.name axioms)
-            axiomMap := axiomMap'
-            validateCollectedAxioms target.ci.name axioms allow_sorry?
+            axiomMap := axiomMap.insert target.ci.name (← checkAxioms env' target.ci.name allow_sorry?)
           else
             throw <| diagnosticErrorMessage s!"Missing declaration in attempted contribution." <| Json.mkObj [
               ("summary", Json.str s!"A declaration in the current file version was not found in the attempted contribution. Please ensure that all declarations in the current file version are still included in the your contribution (i.e. no deletions are allowed)."),
@@ -236,10 +175,9 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     pure (FileMap.ofString source)
   let output ← withTiming timingsRef s!"descriptor.materializeOutput[{modStr}]" <| do
     ret.mapM (fun (desc, rng) => do
-      let axioms := match axiomMap.get? desc.ci.name with
-        | some a => a
-        | none => collectAxiomsRaw env'' desc.ci.name
-      validateCollectedAxioms desc.ci.name axioms desc.target?
+      let axioms ← match axiomMap.get? desc.ci.name with
+        | some a => pure a
+        | none => checkAxioms env' desc.ci.name desc.target?
       pure {desc with
         contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos),
         context := Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos),
@@ -249,30 +187,15 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
 
   return output.toList
 
-unsafe def getTargets' (timingsRef : IO.Ref TimingState)
-    (submission_module : Name)
-    (target_module : Option Name := none)
-    (submission_source_file : Option System.FilePath := none)
-    (target_source_file : Option System.FilePath := none) : IO FileDescriptor := do
-  let effectiveTarget := target_module.getD submission_module
-  let submissionSourceFile ← match submission_source_file with
-    | some fp => pure fp
-    | none => findLean submission_module
 
-  let targetSourceFile ←
-    if effectiveTarget == submission_module then
-      pure submissionSourceFile
-    else
-      match target_source_file with
-      | some fp => pure fp
-      | none => findLean effectiveTarget
+unsafe def getTargets' (timingsRef : IO.Ref TimingState) (submission_module : Name) (target_module : Option Name := none) (source_file : Option System.FilePath := none): IO FileDescriptor := do
 
-  if effectiveTarget == submission_module then
-    getDescriptorForModule timingsRef submission_module (sourceFile? := some submissionSourceFile)
-  else
-    let targetDescriptor ← getDescriptorForModule timingsRef effectiveTarget (sourceFile? := some targetSourceFile)
-    let submittedDescriptor ← getDescriptorForModule timingsRef submission_module targetDescriptor (sourceFile? := some targetSourceFile)
-    return submittedDescriptor
+
+  let targetDescriptor ← withTiming timingsRef "getTargets.buildTargetDescriptor" <| do
+    getDescriptorForModule timingsRef (target_module.getD submission_module) (sourceFile? := source_file)
+  let submittedDescriptor ← withTiming timingsRef "getTargets.buildSubmissionDescriptor" <| do
+    getDescriptorForModule timingsRef submission_module targetDescriptor (sourceFile? := source_file)
+  return submittedDescriptor
 
 
 
@@ -297,14 +220,15 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
     let targetContent? ← withTiming timingsRef "cli.resolveTargetInput" <| do
       target?.mapM (fun t => getFileOrModuleContents t)
 
-    let (_, target_mod?, target_fp?) := match targetContent? with
+    let (_, target_mod?, fp?) := match targetContent? with
       | some (c, m, fp) => (some c, some m, some fp)
       | none => (none, none, none)
 
 
-    let (_, sub_mod, sub_fp) ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
+    let (_,sub_mod, _) ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
       getFileOrModuleContents submission
-    let descriptor ← getTargets' timingsRef sub_mod target_mod? (submission_source_file := some sub_fp) (target_source_file := target_fp?)
+    let descriptor ← withTiming timingsRef "cli.computeDescriptor" <| do
+      getTargets' timingsRef sub_mod target_mod? fp?
     let json ← withTiming timingsRef "cli.encodeDescriptorJson" <| do
       pure (ToJson.toJson descriptor)
     if save?.isSome then

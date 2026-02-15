@@ -133,6 +133,17 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     for (n,ci) in constants_in_mod  do
       -- IO.println s!"Processing declaration {n} of kind {ci.kind}..."
       if ci.kind ∈ ["theorem", "def"] then
+        if let .defnInfo dv := ci then
+          if dv.safety != .safe then
+            let str_safety := match dv.safety with
+              | .safe => "safe"
+              | .unsafe => "unsafe"
+              | .partial => "partial"
+            throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
+              ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
+              ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
+              ]
+
         scanCandidates := scanCandidates.push (n, ci)
         namesForHumanScan := namesForHumanScan.push n
     for target in targetDescriptor?.getD [] do
@@ -148,20 +159,6 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
 
   let humanDeclMap ← withTiming timingsRef s!"descriptor.batchHumanDeclScan[{modStr}]" <| do
     batchHumanDecls namesForHumanScan env''
-
-  withTiming timingsRef s!"descriptor.validateHumanDeclSafety[{modStr}]" <| do
-    for (n, ci) in scanCandidates do
-      if (humanDeclMap.get? n).isSome then
-        if let .defnInfo dv := ci then
-          if dv.safety != .safe then
-            let str_safety := match dv.safety with
-              | .safe => "safe"
-              | .unsafe => "unsafe"
-              | .partial => "partial"
-            throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
-              ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
-              ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
-              ]
 
   let mut ret : Array (DeclarationDescriptor × DeclarationRanges) ← withTiming timingsRef s!"descriptor.buildDescriptorSeed[{modStr}]" <| do
     let mut ret : Array (DeclarationDescriptor × DeclarationRanges) := #[]
