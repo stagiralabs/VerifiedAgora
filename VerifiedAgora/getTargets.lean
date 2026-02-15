@@ -128,13 +128,9 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     pure ciMap
 
   let (scanCandidates, namesForHumanScan) ← withTiming timingsRef s!"descriptor.scanDeclarations[{modStr}]" <| do
-    let mut scanCandidates : Array (Name × ConstantInfo) := #[]
     let mut namesForHumanScan : Array Name := #[]
-    for (n,ci) in constants_in_mod  do
-      -- IO.println s!"Processing declaration {n} of kind {ci.kind}..."
-      if ci.kind ∈ ["theorem", "def"] then
-        scanCandidates := scanCandidates.push (n, ci)
-        namesForHumanScan := namesForHumanScan.push n
+    for n in tagged_decl_names.toList do
+      namesForHumanScan := namesForHumanScan.push n
     for target in targetDescriptor?.getD [] do
       namesForHumanScan := namesForHumanScan.push target.ci.name
 
@@ -144,6 +140,13 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
       if n ∉ seenNames then
         seenNames := seenNames.insert n
         dedupNames := dedupNames.push n
+
+    let mut scanCandidates : Array (Name × ConstantInfo) := #[]
+    for n in dedupNames do
+      if let some ci := ciMap.get? n then
+        if ci.kind ∈ ["theorem", "def"] then
+          scanCandidates := scanCandidates.push (n, ci)
+
     pure (scanCandidates, dedupNames)
 
   let humanDeclMap ← withTiming timingsRef s!"descriptor.batchHumanDeclScan[{modStr}]" <| do
