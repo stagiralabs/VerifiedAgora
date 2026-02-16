@@ -2,7 +2,8 @@ import Cli.Extensions
 import VerifiedAgora.tagger
 import VerifiedAgora.Frontend
 import VerifiedAgora.TacticInvocation
-open Lean Core Elab IO Meta Term Command Tactic Cli
+import VerifiedAgora.constantData
+open Lean Core Elab IO Meta Term Command Tactic Cli ConstantData
 
 
 
@@ -48,15 +49,6 @@ where
 
 
 
-def Lean.ConstantInfo.kind : ConstantInfo → String
-  | .axiomInfo  _ => "axiom"
-  | .defnInfo   _ => "def"
-  | .thmInfo    _ => "theorem"
-  | .opaqueInfo _ => "opaque"
-  | .quotInfo   _ => "quot"
-  | .inductInfo _ => "inductive"
-  | .ctorInfo   _ => "constructor"
-  | .recInfo    _ => "recursor"
 
 def AllowedAxioms := [`propext, `Quot.sound, `Classical.choice]
 def TargetsAllowedAxioms := AllowedAxioms ++ [`sorryAx]
@@ -108,6 +100,7 @@ structure Info where
 instance : Inhabited _root_.Info where
   default := { name := Name.anonymous, constInfo := default, axioms := #[] }
 
+
 /-
 From Lean.Environment
 Check if two theorems have the same type and name
@@ -137,52 +130,67 @@ def equivDefn (ctarget cnew : ConstantInfo)(checkVal:Bool:=false) : Bool := Id.r
 
 
 structure DeclarationDescriptor where
-  ci : ConstantInfo
-  contents : Substring
-  context : Substring
-  -- msgs? : Option (List (MessageSeverity × String))
+  ci : ConstantData
+  contents : String
+  context : String
   axioms : Array Name
   target? : Bool
   resolved? : Bool
   sourceFile? : Option System.FilePath
+  deriving Inhabited, BEq
 
-
-instance: BEq DeclarationDescriptor where
-  beq d1 d2 :=
-    d1.ci.name == d2.ci.name &&
-    d1.ci.type == d2.ci.type &&
-    d1.ci.kind == d2.ci.kind &&
-    d1.sourceFile? == d2.sourceFile? &&
-    d1.target? == d2.target? &&
-    d1.axioms == d2.axioms &&
-    d1.contents == d2.contents &&
-    d1.context == d2.context
 
 def DeclarationDescriptor.toJson (desc : DeclarationDescriptor) : Json :=
 
     Json.mkObj [
     ("name", Json.str desc.ci.name.toString),
-    -- ("type", Json.str desc.ci.type.dbgToString),
     ("kind", Json.str desc.ci.kind),
     ("sourceFile", Json.str (match desc.sourceFile? with
       | some fp => toString (fp.normalize)
       | none    => "<unknown>"
       )
     ),
-    ("contents", Json.str desc.contents.toString),
+    ("contents", Json.str desc.contents),
     ("target?", Json.bool desc.target?),
-    ("context", Json.str desc.context.toString),
-    -- ("msgs", match desc.msgs? with
-    --   | some msgs => Json.arr <| msgs.toArray.map (fun (sev, data) => Json.mkObj [("severity", (ToJson.toJson sev)), ("data", Json.str data)])
-    --   | none => Json.str "<unable to extract messages>"
-    -- )
+    ("context", Json.str desc.context),
     ("resolved?", Json.bool desc.resolved?),
-    ("axioms", Json.arr <| desc.axioms.map (fun ax => Json.str ax.toString))
+    ("axioms", Json.arr <| desc.axioms.map (fun ax => Json.str ax.toString)),
+    ("ci", ToJson.toJson desc.ci)
   ]
 
+def DeclarationDescriptor.fromJson (json : Json) : Except String DeclarationDescriptor := do
+  -- let name ← json.getObjValAs? String "name"
+  -- let kind ← json.getObjValAs? String "kind"
+  let contents ← json.getObjValAs? String "contents"
+  let context ← json.getObjValAs? String "context"
+  let target? ← json.getObjValAs? Bool "target?"
+  let resolved? ← json.getObjValAs? Bool "resolved?"
+  let sourceFile? := match (← json.getObjValAs? (Option String) "sourceFile") with
+    | some s => some (System.FilePath.mk s)
+    | none   => none
+  let axiomsJson ← json.getObjValAs? (Array Json) "axioms"
+  let axioms ← axiomsJson.mapM (fun axJson => do
+    let axStr ← axJson.getStr?
+    return Name.mkSimple axStr
+  )
+
+  let ci ← FromJson.fromJson? (← json.getObjValAs? Json "ci") |>.mapError (fun e => s!"Error parsing 'ci': {e}")
+
+  return {
+    ci := ci,
+    contents := contents,
+    context := context,
+    target? := target?,
+    resolved? := resolved?,
+    sourceFile? := sourceFile?,
+    axioms := axioms
+  }
 
 instance : ToJson DeclarationDescriptor where
   toJson fd := fd.toJson
+
+instance : FromJson DeclarationDescriptor where
+  fromJson? json := DeclarationDescriptor.fromJson json
 
 instance : ToString DeclarationDescriptor where
   toString fd := ToJson.toJson fd |>.pretty
