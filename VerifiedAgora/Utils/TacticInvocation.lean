@@ -1,4 +1,4 @@
-import VerifiedAgora.InfoTree
+import VerifiedAgora.Utils.InfoTree
 
 set_option autoImplicit true
 

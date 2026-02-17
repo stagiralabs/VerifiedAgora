@@ -25,5 +25,5 @@ lean_exe get_all_targets where
 
 @[default_target]
 lean_exe get_default_targets where
-  root := `VerifiedAgora.getDefaultTargets
+  root := `VerifiedAgora.Utils.GetDefaultTargets
   supportInterpreter := true

@@ -1,93 +1,11 @@
 import Cli.Extensions
 import VerifiedAgora.tagger
-import VerifiedAgora.Frontend
-import VerifiedAgora.TacticInvocation
-import VerifiedAgora.Utils
-import VerifiedAgora.CollectAxiomsBatched
+import VerifiedAgora.Utils.Utils
 open Lean Core Elab IO Meta Term Command Tactic Cli Environment CollectAxiomsBatched
 
-structure TimingStats where
-  totalMs : Nat := 0
-  count : Nat := 0
-  maxMs : Nat := 0
-  deriving Inhabited
-
-structure TimingState where
-  order : Array String := #[]
-  stats : Std.HashMap String TimingStats := {}
-  deriving Inhabited
-
-def recordTiming (timingsRef : IO.Ref TimingState) (label : String) (elapsedMs : Nat) : IO Unit := do
-  timingsRef.modify fun s =>
-    let existing := s.stats.get? label
-    let prev := existing.getD {}
-    let next : TimingStats := {
-      totalMs := prev.totalMs + elapsedMs
-      count := prev.count + 1
-      maxMs := max prev.maxMs elapsedMs
-    }
-    let order := if existing.isSome then s.order else s.order.push label
-    { order := order, stats := s.stats.insert label next }
-
-def withTiming (timingsRef : IO.Ref TimingState) (label : String) (action : IO α) : IO α := do
-  let start ← IO.monoMsNow
-  try
-    let out ← action
-    let stop ← IO.monoMsNow
-    recordTiming timingsRef label (stop - start)
-    return out
-  catch e =>
-    let stop ← IO.monoMsNow
-    recordTiming timingsRef label (stop - start)
-    throw e
-
-def printTimingSummary (timingsRef : IO.Ref TimingState) : IO Unit := do
-  let timings ← timingsRef.get
-  IO.println "<TIMING_SUMMARY>"
-  let mut totalMeasured : Nat := 0
-  for label in timings.order do
-    if let some stats := timings.stats.get? label then
-      let avg := if stats.count == 0 then 0 else stats.totalMs / stats.count
-      totalMeasured := totalMeasured + stats.totalMs
-      IO.println s!"{label}: total={stats.totalMs}ms count={stats.count} avg={avg}ms max={stats.maxMs}ms"
-  IO.println s!"TOTAL_MEASURED: {totalMeasured}ms"
-  IO.println "</TIMING_SUMMARY>"
-
-def collectAxiomsRaw (env : Environment) (n : Name) : Array Name :=
-  let (_, s) := (CollectAxioms.collect n).run env |>.run {}
-  s.axioms
-
-def validateCollectedAxioms (n : Name) (axioms : Array Name) (allow_sorry? : Bool := false) : IO Unit := do
-  let allowedAxioms := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
-  for a in axioms do
-    if a ∉ allowedAxioms then
-      throw <| diagnosticErrorMessage s!"Declaration relies on disallowed axiom." <| Json.mkObj [
-        ("summary", Json.str s!"A declaration in the attempted contribution relies on a disallowed axiom. Remember, standard declarations must only rely on the allowed set of standard axioms ({String.intercalate ", " (AllowedAxioms.map Name.toString)}) for Agora contributions. Declarations tagged as targets are allowed to additionally rely on \"sorryAx\", but only if the previous proof of said target also relied on \"sorryAx\" - meaning that contributions cannot regress already resolved targets to once again be unresolved."),
-        ("offending axiom", Json.str s!"Declaration {n} relies on axiom {a}, which is not in its allowed set of axioms ({String.intercalate ", " (allowedAxioms.map Name.toString)})")
-      ]
-
-def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap Name DeclarationRanges) := do
-  let ctx := {fileName := "", fileMap := default}
-  let state : Core.State := {env := env}
-  let fn : CoreM (Std.HashMap Name DeclarationRanges) := do
-    let mut out : Std.HashMap Name DeclarationRanges := {}
-    for name in names do
-      let hasDeclRange := (← Lean.findDeclarationRanges? name)
-      let notProjFn := !(← Lean.isProjectionFn name)
-      match (hasDeclRange, notProjFn) with
-      | (some rng, true) =>
-        out := out.insert name rng
-      | _ =>
-        pure ()
-    return out
-  let result? ← CoreM.run' fn ctx state |>.toIO'
-  match result?.toOption with
-  | some out => pure out
-  | none => pure {}
-
-
 /-- Imports the project modules in a single environment and gets all tagged declarations. Requires project to be `lake build`-ed first. -/
-unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) : IO FileDescriptor := do
+unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) (checkAll? : Bool) :
+    IO (List FileDescriptor × Array CollectedFailure) := do
   let env ← withTiming timingsRef "descriptor.importDependencies" <| do
     let imports := importMods.map (fun mod => ({ module := mod } : Import))
     importModules imports {} 0
@@ -96,11 +14,20 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     pure <| env.constants.fold (fun acc k ci =>
       if TagAttribute.hasTag targetAttribute env k then ci :: acc else acc
     ) []
+  let tagged_decl_names := tagged_decls.map (fun ci => ci.name) |>.foldl (·.insert ·) Std.HashSet.empty
+  let failuresRef ← IO.mkRef (#[] : Array CollectedFailure)
 
   let (scanCandidates, namesForHumanScan) ← withTiming timingsRef "descriptor.scanDeclarations" <| do
     let mut scanCandidates : Array (Name × ConstantInfo) := #[]
     let mut namesForHumanScan : Array Name := #[]
-    for ci in tagged_decls do
+    let decls_to_scan ← if checkAll?
+      then
+        let temp ← getConstantsInModules env importMods
+        pure <| temp.toList.map (fun (_, ci) => ci)
+      else
+        pure tagged_decls
+    IO.println s!"Scanning {decls_to_scan.length} declarations for targets..."
+    for ci in decls_to_scan do
       if ci.kind ∈ ["theorem", "def"] then
         scanCandidates := scanCandidates.push (ci.name, ci)
         namesForHumanScan := namesForHumanScan.push ci.name
@@ -113,7 +40,7 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     pure (scanCandidates, dedupNames)
 
   let humanDeclMap ← withTiming timingsRef "descriptor.batchHumanDeclScan" <| do
-    batchHumanDecls namesForHumanScan env
+    batchHumanDecls namesForHumanScan env true
 
   withTiming timingsRef "descriptor.validateHumanDeclSafety" <| do
     for (n, ci) in scanCandidates do
@@ -124,71 +51,101 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
               | .safe => "safe"
               | .unsafe => "unsafe"
               | .partial => "partial"
-            throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
-              ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
-              ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
-            ]
+            let moduleName := match env.getModuleIdxFor? n with
+              | some idx => (env.header.moduleNames.get! idx).toString
+              | none => "<unknown>"
+            failuresRef.modify (fun failures => failures.push {
+              declName := n.toString
+              moduleName := moduleName
+              kind := "unsafe_partial"
+              summary := "The declaration is unsafe or partial."
+              detail := s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\"."
+            })
 
   let sourceFileCacheRef ← IO.mkRef ({} : Std.HashMap Name System.FilePath)
-  let ret : Array (DeclarationDescriptor × DeclarationRanges) ← withTiming timingsRef "descriptor.buildDescriptorSeed" <| do
-    let mut ret : Array (DeclarationDescriptor × DeclarationRanges) := #[]
+  let ret : Array (DeclarationDescriptor × (Option Name) × DeclarationRanges) ← withTiming timingsRef "descriptor.buildDescriptorSeed" <| do
+    let mut ret : Array (DeclarationDescriptor × (Option Name) × DeclarationRanges) := #[]
     for (n, ci) in scanCandidates do
       if let some rng := humanDeclMap.get? n then
-        let sourceFile? ←
+        let mod? ←
           match env.getModuleIdxFor? n with
           | some modidx =>
             let declMod := env.header.moduleNames.get! modidx
             let sourceFileCache ← sourceFileCacheRef.get
             match sourceFileCache.get? declMod with
-            | some fp => pure (some fp)
+            | some _ => pure (some declMod)
             | none =>
               let fp ← findLean declMod
               sourceFileCacheRef.modify (fun m => m.insert declMod fp)
-              pure (some fp)
+              pure (some declMod)
           | none => pure none
         ret := ret.push ({
-          ci := ci,
+          ci := .fromConstantInfo (mod?.getD default) ci,
           contents := default,
           context := default,
           axioms := default,
-          target? := true,
-          resolved? := default,
-          sourceFile? := sourceFile?
-        }, rng)
+          target? := tagged_decl_names.contains n,
+          resolved? := default
+        }, mod?, rng)
     pure ret
 
   let axiomMap : Std.HashMap Name (Array Name) ← withTiming timingsRef "descriptor.precomputeAxioms" <| do
-    let names := ret.map (fun (desc, _) => desc.ci.name)
+    let names := ret.map (fun (desc, _, _) => desc.ci.name)
     pure (collectAxiomsBatched env names)
 
   let mut loadedFileMaps : Std.HashMap System.FilePath FileMap := {}
-  let mut out : Array DeclarationDescriptor := #[]
-  for (desc, rng) in ret do
-    let source ← match desc.sourceFile? with
-    | some fp =>
-      match loadedFileMaps.get? fp with
-      | some fm => pure fm
-      | none => do
-        let fm ← withTiming timingsRef "descriptor.loadSourceFile" <| do
-          pure <| FileMap.ofString (← IO.FS.readFile fp)
-        loadedFileMaps := loadedFileMaps.insert fp fm
-        pure fm
+  let mut out : Array (DeclarationDescriptor × Name) := #[]
+  for (desc, mod?, rng) in ret do
+    let source ← match mod? with
+    | some mod => do
+      let fp? := (← sourceFileCacheRef.get).get? mod
+      match fp? with
+      | some fp => match loadedFileMaps.get? fp with
+        | some fm => pure fm
+        | none => do
+          let fm ← withTiming timingsRef "descriptor.loadSourceFile" <| do
+            pure <| FileMap.ofString (← IO.FS.readFile fp)
+          loadedFileMaps := loadedFileMaps.insert fp fm
+          pure fm
+      | none => pure default
     | none => pure default
 
     let axioms := match axiomMap.get? desc.ci.name with
       | some a => a
       | none => collectAxiomsRaw env desc.ci.name
-    validateCollectedAxioms desc.ci.name axioms true
+    let moduleName := mod?.map Name.toString |>.getD "<unknown>"
+    let axiomFailures := collectAxiomViolations desc.ci.name axioms (tagged_decl_names.contains desc.ci.name) moduleName
+    failuresRef.modify (fun failures => failures ++ axiomFailures)
 
-    out := out.push {
+    out := out.push ({
       desc with
-      contents := Substring.mk source.source (source.ofPosition rng.range.pos) (source.ofPosition rng.range.endPos),
-      context := Substring.mk source.source ⟨0⟩ (source.ofPosition rng.range.pos),
+      contents := Substring.mk source.source (source.ofPosition rng.range.pos) (source.ofPosition rng.range.endPos) |>.toString,
+      context := Substring.mk source.source ⟨0⟩ (source.ofPosition rng.range.pos) |>.toString,
       axioms := axioms,
       resolved? := axioms.all (fun a => a ∈ AllowedAxioms)
-    }
+    }, mod?.getD default)
 
-  return out.toList
+  let out' : Array (DeclarationDescriptor × Name × System.FilePath × String) ← out.mapM (fun (desc, mod) => do
+    let fp := (← sourceFileCacheRef.get).get? mod |>.getD default
+    let contents := match loadedFileMaps[fp]? with
+      | some fm => fm.source
+      | none => default
+    pure (desc, mod, fp, contents)
+    )
+
+  let out'' := out'.groupByKey (fun (_, mod, _, _) => mod) |>.toArray.map (fun (mod, vals) =>
+    let decls := vals.map (fun (desc, _, _, _) => desc)
+    let path := match vals[0]? with
+      | some (_, _, fp, _) => fp
+      | none => default
+    let contents := match vals[0]? with
+      | some (_, _, _, contents) => contents
+      | none => default
+    { decls := decls.toList, path := path, moduleName := mod, contents := contents }
+  )
+
+  let failures ← failuresRef.get
+  return (out''.toList, failures)
 
 
 
@@ -223,12 +180,13 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   let appBuildLib := (← IO.appDir).parent.get! / "lib"
   let runtimeSearchPath :=
     if appBuildLib ∈ runtimeSearchPath then runtimeSearchPath else runtimeSearchPath ++ [appBuildLib]
-  searchPathRef.set (runtimeSearchPath ++ compile_time_search_path%)
+  let merged ← Lean.addSearchPathFromEnv (runtimeSearchPath ++ compile_time_search_path%)
+  searchPathRef.set merged
   enableInitializersExecution
 
   try
     let importModsList : List Name ← withTiming timingsRef "cli.resolveImportInput" <| do
-      let importFiles := (args.flag! "importFiles" |>.as! String).trim
+      let importFiles := (args.flag! "import_files" |>.as! String).trim
       if importFiles == "<default>" then
         return (← getDefaultImportsViaLakeExe)
       else
@@ -244,7 +202,10 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
         seenMods := seenMods.insert mod
         importMods := importMods.push mod
 
-    let descriptors ← getAllTargetsInProject timingsRef importMods
+    let checkFiles? := (args.flag! "check_all" |>.as! String).trim.toLower == "true"
+
+
+    let (descriptors, failures) ← getAllTargetsInProject timingsRef importMods checkFiles?
 
     let json ← withTiming timingsRef "cli.encodeDescriptorJson" <| do
       pure (toJson descriptors).pretty
@@ -252,8 +213,19 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
     IO.println "<DESCRIPTOR>"
     IO.println json
     IO.println "</DESCRIPTOR>"
+
+    if failures.size > 0 then
+      let diagnosticsJson ← withTiming timingsRef "cli.encodeDiagnosticsJson" <| do
+        pure (toJson failures).pretty
+      IO.println "<AGORA_DIAGNOSTICS_ALL>"
+      IO.println diagnosticsJson
+      IO.println "</AGORA_DIAGNOSTICS_ALL>"
+
     printTimingSummary timingsRef
-    return (0 : UInt32)
+    if failures.size > 0 then
+      return (1 : UInt32)
+    else
+      return (0 : UInt32)
   catch e =>
     printTimingSummary timingsRef
     IO.eprintln s!"Error: {e}"
@@ -267,10 +239,11 @@ unsafe def getAllTargets : Cmd := `[Cli|
   "Get targets from a string."
 
     FLAGS:
-      importFiles : String; "(Comma-seperated list of) file paths/modules for target import files."
+      import_files : String; "(Comma-seperated list of) file paths/modules for target import files. Default: defaultTargets in your lakefile"
+      check_all : Bool; "If true, check all declarations in the imported modules. Default: false."
 
     EXTENSIONS:
-      defaultValues! #[("importFiles", "<default>")]
+      defaultValues! #[("import_files", "<default>"), ("check_all", "false")]
   ]
 
 

@@ -1,109 +1,12 @@
 import Cli.Extensions
 import VerifiedAgora.tagger
-import VerifiedAgora.Frontend
-import VerifiedAgora.TacticInvocation
-import VerifiedAgora.Utils
-import VerifiedAgora.CollectAxiomsBatched
+import VerifiedAgora.Utils.Utils
 open Lean Core Elab IO Meta Term Command Tactic Cli Environment CollectAxiomsBatched
 
-structure TimingStats where
-  totalMs : Nat := 0
-  count : Nat := 0
-  maxMs : Nat := 0
-  deriving Inhabited
+def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targetDescriptor? : Option FileDescriptor := none) :
+    IO (List DeclarationDescriptor × Array CollectedFailure) := do
 
-structure TimingState where
-  order : Array String := #[]
-  stats : Std.HashMap String TimingStats := {}
-  deriving Inhabited
-
-def recordTiming (timingsRef : IO.Ref TimingState) (label : String) (elapsedMs : Nat) : IO Unit := do
-  timingsRef.modify fun s =>
-    let existing := s.stats.get? label
-    let prev := existing.getD {}
-    let next : TimingStats := {
-      totalMs := prev.totalMs + elapsedMs
-      count := prev.count + 1
-      maxMs := max prev.maxMs elapsedMs
-    }
-    let order := if existing.isSome then s.order else s.order.push label
-    { order := order, stats := s.stats.insert label next }
-
-def withTiming (timingsRef : IO.Ref TimingState) (label : String) (action : IO α) : IO α := do
-  let start ← IO.monoMsNow
-  try
-    let out ← action
-    let stop ← IO.monoMsNow
-    recordTiming timingsRef label (stop - start)
-    return out
-  catch e =>
-    let stop ← IO.monoMsNow
-    recordTiming timingsRef label (stop - start)
-    throw e
-
-def printTimingSummary (timingsRef : IO.Ref TimingState) : IO Unit := do
-  let timings ← timingsRef.get
-  IO.println "<TIMING_SUMMARY>"
-  let mut totalMeasured : Nat := 0
-  for label in timings.order do
-    if let some stats := timings.stats.get? label then
-      let avg := if stats.count == 0 then 0 else stats.totalMs / stats.count
-      totalMeasured := totalMeasured + stats.totalMs
-      IO.println s!"{label}: total={stats.totalMs}ms count={stats.count} avg={avg}ms max={stats.maxMs}ms"
-  IO.println s!"TOTAL_MEASURED: {totalMeasured}ms"
-  IO.println "</TIMING_SUMMARY>"
-
-
-def printExpr (ex : Expr) (env : Environment) : IO Format := do
-  let ctx:={fileName:="", fileMap:=default}
-  Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ex) ctx {env:=env})
-
-def collectAxiomsRaw (env : Environment) (n : Name) : Array Name :=
-  let (_, s) := (CollectAxioms.collect n).run env |>.run {}
-  s.axioms
-
-def validateCollectedAxioms (n : Name) (axioms : Array Name) (allow_sorry? : Bool := false) : IO Unit := do
-  let allowedAxioms := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
-  for a in axioms do
-    if a ∉ allowedAxioms then
-      throw <| diagnosticErrorMessage s!"Declaration relies on disallowed axiom." <| Json.mkObj [
-        ("summary", Json.str s!"A declaration in the attempted contribution relies on a disallowed axiom. Remember, standard declarations must only rely on the allowed set of standard axioms ({String.intercalate ", " (AllowedAxioms.map Name.toString)}) for Agora contributions. Declarations tagged as targets are allowed to additionally rely on \"sorryAx\", but only if the previous proof of said target also relied on \"sorryAx\" - meaning that contributions cannot regress already resolved targets to once again be unresolved."),
-        ("offending axiom", Json.str s!"Declaration {n} relies on axiom {a}, which is not in its allowed set of axioms ({String.intercalate ", " (allowedAxioms.map Name.toString)})")
-      ]
-
-def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap Name DeclarationRanges) := do
-  let ctx := {fileName:="", fileMap:=default}
-  let state : Core.State := {env := env}
-  let fn : CoreM (Std.HashMap Name DeclarationRanges) := do
-    let mut out : Std.HashMap Name DeclarationRanges := {}
-    for name in names do
-      let hasDeclRange := (← Lean.findDeclarationRanges? name)
-      let notProjFn := !(← Lean.isProjectionFn name)
-      match (hasDeclRange, notProjFn) with
-      | (some rng, true) =>
-        out := out.insert name rng
-      | _ =>
-        pure ()
-    return out
-
-  let result? ← CoreM.run' fn ctx state |>.toIO'
-  match result?.toOption with
-  | some x => pure x
-  | none => pure {}
-
-
-def getConstantsInModule (env : Environment) (mod : Name): IO (Std.HashMap Name ConstantInfo) := do
-  let modIdx? : Option ModuleIdx := env.getModuleIdx? mod
-  let mut ciMap : Std.HashMap Name ConstantInfo := {}
-  for (n,ci) in env.constants  do
-    let ownedByModule := match modIdx?, env.getModuleIdxFor? n with
-      | some modIdx, some declIdx => modIdx == declIdx
-      | _, _ => false
-    if ownedByModule then
-      ciMap := ciMap.insert n ci
-  pure ciMap
-
-def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targetDescriptor? : Option FileDescriptor := none) (sourceFile? : Option System.FilePath := none) : IO FileDescriptor := do
+  let failuresRef ← IO.mkRef (#[] : Array CollectedFailure)
 
   let modStr := mod.toString
 
@@ -135,7 +38,7 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
       if ci.kind ∈ ["theorem", "def"] then
         scanCandidates := scanCandidates.push (n, ci)
         namesForHumanScan := namesForHumanScan.push n
-    for target in targetDescriptor?.getD [] do
+    for target in (targetDescriptor?.getD default).decls do
       namesForHumanScan := namesForHumanScan.push target.ci.name
 
     let mut dedupNames : Array Name := #[]
@@ -158,21 +61,24 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
               | .safe => "safe"
               | .unsafe => "unsafe"
               | .partial => "partial"
-            throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
-              ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
-              ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
-              ]
+            appendFailures failuresRef #[{
+              declName := n.toString
+              moduleName := modStr
+              kind := "unsafe_partial"
+              summary := "The declaration is unsafe or partial."
+              detail := s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\"."
+            }]
 
   let mut ret : Array (DeclarationDescriptor × DeclarationRanges) ← withTiming timingsRef s!"descriptor.buildDescriptorSeed[{modStr}]" <| do
     let mut ret : Array (DeclarationDescriptor × DeclarationRanges) := #[]
     for (n, ci) in scanCandidates do
       if let some rng := humanDeclMap.get? n then
         ret := ret.push ({
-          ci := ci,
+          ci := .fromConstantInfo mod ci,
           contents := default, -- we fill this in later since we need the file map for it
           context := default, -- we fill this in later since we need the file map for it
           target? := tagged_decl_names.contains n,
-          sourceFile? := sourceFile?,
+          -- sourceFile? := sourceFile?,
           axioms := default, -- we fill this in later when we do regression and axiom checking
           resolved? := default -- same
         }, rng)
@@ -182,36 +88,42 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     let names := ret.map (fun (desc, _) => desc.ci.name)
     return collectAxiomsBatched env'' names
 
-  let exprPrinter (e : Expr) := printExpr e env''
-
-  if (targetDescriptor?.getD []).length > 0 then
+  if (targetDescriptor?.getD default).decls.length > 0 then
     axiomMap ← withTiming timingsRef s!"descriptor.compareAgainstTarget[{modStr}]" <| do
       let mut axiomMap := axiomMap
-      for target in targetDescriptor?.getD [] do
+      for target in (targetDescriptor?.getD default).decls do
         if (humanDeclMap.get? target.ci.name).isSome then
-          if let some ci' := ciMap.get? target.ci.name then
+          if let some ci'_info := ciMap.get? target.ci.name then
+            let ci' := .fromConstantInfo mod ci'_info
             if target.ci.kind ≠ ci'.kind then
-              throw <| diagnosticErrorMessage s!"Declaration kind mismatch between current and attempted contribution" <|
-              Json.mkObj [
-                ("summary", Json.str "The declaration kind in the attempted contribution does not match the corresponding declaration in the current version."),
-                ("offending declaration", Json.str s!"Declaration {target.ci.name} has kind \"{ci'.kind}\" in the attempted contribution, but is expected to have kind \"{target.ci.kind}\".")
-              ]
+              appendFailures failuresRef #[{
+                declName := target.ci.name.toString
+                moduleName := modStr
+                kind := "kind_mismatch"
+                summary := "The declaration kind in the attempted contribution does not match the current version."
+                detail := s!"Declaration {target.ci.name} has kind \"{ci'.kind}\" in the attempted contribution, but is expected to have kind \"{target.ci.kind}\"."
+              }]
             if ci'.kind=="theorem" then
-              if Not (equivThm target.ci ci') then
-                throw <| diagnosticErrorMessage s!"Theorem statement mismatch between current and attempted contribution" <|
-                Json.mkObj [
-                  ("summary", Json.str "A theorem statement in the attempted contribution does not match the corresponding theorem statement in the current version. Please ensure that the statement (type, name, etc.) of the theorem is exactly the same as in the current version."),
-                  ("offending declaration", Json.str s!"Theorem {target.ci.name} has type \"{← exprPrinter ci'.type}\" in the attempted contribution, but is expected to have type \"{← exprPrinter target.ci.type}\".")
-                ]
+              if Not (equivThmDataNormalized target.ci ci' mod (targetDescriptor?.map FileDescriptor.moduleName)) then
+                appendFailures failuresRef #[{
+                  declName := target.ci.name.toString
+                  moduleName := modStr
+                  kind := "theorem_mismatch"
+                  summary := "A theorem statement in the attempted contribution does not match the current version."
+                  detail := s!"Theorem {target.ci.name} has type \"{ci'.type}\" in the attempted contribution, but is expected to match the type of: {target.ci.type}."
+                }]
             if ci'.kind=="def" then
-              if Not (equivDefn target.ci ci' (`sorryAx ∉ target.axioms)) then
+              if Not (equivDefnDataNormalized target.ci ci' mod (targetDescriptor?.map FileDescriptor.moduleName) (`sorryAx ∉ target.axioms)) then
                 let valStr ← if `sorryAx ∉ target.axioms then
-                  pure s!" \n\nAdditionally, the definitions have the following values:\n\nThe attempted contribution has value: \"{← exprPrinter ci'.value!}\"\n\nThe contribution is expected to have value: \"{← exprPrinter target.ci.value!}\""
+                  pure s!" Additionally, attempted value: \"{ci'.value?.get!}\"; expected value: \"{target.ci.value?.get!}\"."
                 else pure ""
-                throw <| diagnosticErrorMessage s!"Definition statement mismatch between current and attempted contribution" <| Json.mkObj [
-                  ("summary", Json.str "A definition statement in the attempted contribution does not match the corresponding definition statement in the current version. Please ensure that the statement (type, name, etc.) of the definition is exactly the same as in the current version. Additionally, unless the definition's value relies on the `sorry` axiom, the value of the definition must also be exactly the same."),
-                  ("offending declaration", Json.str <| s!"Definition {target.ci.name} has type:\n\n \"{← exprPrinter ci'.type}\" \n\nin the attempted contribution, and is expected to have type \n\n \"{← exprPrinter target.ci.type}\"" ++ valStr)
-                ]
+                appendFailures failuresRef #[{
+                  declName := target.ci.name.toString
+                  moduleName := modStr
+                  kind := "definition_mismatch"
+                  summary := "A definition statement in the attempted contribution does not match the current version."
+                  detail := s!"Definition {target.ci.name} has type \"{ci'.type}\" in the attempted contribution, and is expected to have type \"{target.ci.type}\".{valStr}"
+                }]
 
             let allow_sorry? := target.ci.name ∈ tagged_decl_names && (`sorryAx ∈ target.axioms)
             -- we allow sorry axiom only on marked targets, where the target itself relies on sorry
@@ -221,12 +133,15 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
                 let axioms := collectAxiomsRaw env'' target.ci.name
                 (axioms, axiomMap.insert target.ci.name axioms)
             axiomMap := axiomMap'
-            validateCollectedAxioms target.ci.name axioms allow_sorry?
+            appendFailures failuresRef (collectAxiomViolations target.ci.name axioms allow_sorry? modStr)
           else
-            throw <| diagnosticErrorMessage s!"Missing declaration in attempted contribution." <| Json.mkObj [
-              ("summary", Json.str s!"A declaration in the current file version was not found in the attempted contribution. Please ensure that all declarations in the current file version are still included in the your contribution (i.e. no deletions are allowed)."),
-              ("offending declaration", Json.str s!"Declaration {target.ci.name} was found in the current file version, but no declaration with this name was found in the attempted contribution.")
-            ]
+            appendFailures failuresRef #[{
+              declName := target.ci.name.toString
+              moduleName := modStr
+              kind := "missing_declaration"
+              summary := "A declaration in the current file version was not found in the attempted contribution."
+              detail := s!"Declaration {target.ci.name} was found in the current file version, but no declaration with this name was found in the attempted contribution."
+            }]
       pure axiomMap
 
 
@@ -239,34 +154,74 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
       let axioms := match axiomMap.get? desc.ci.name with
         | some a => a
         | none => collectAxiomsRaw env'' desc.ci.name
-      validateCollectedAxioms desc.ci.name axioms desc.target?
+      appendFailures failuresRef (collectAxiomViolations desc.ci.name axioms desc.target? modStr)
       pure {desc with
-        contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos),
-        context := Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos),
+        contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos) |>.toString,
+        context := Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos) |>.toString,
         axioms := axioms,
         resolved? := axioms.all (fun a => a ∈ AllowedAxioms) -- we consider a declaration resolved if it relies only on allowed axioms, meaning it doesn't rely on sorry or any disallowed axioms
       })
 
-  return output.toList
+  let failures ← failuresRef.get
+  return (output.toList, failures)
 
 unsafe def getTargets' (timingsRef : IO.Ref TimingState)
-    (submission_module : Name)
-    (target_module : Option Name := none) : IO FileDescriptor := do
-  let effectiveTarget := target_module.getD submission_module
+    (submission_data : (String × Name × System.FilePath))
+    (target_data : Option (String × Name × System.FilePath) := none)
+    (useCache : Bool := true)
+    : IO (FileDescriptor × Array CollectedFailure) := do
+  let submission_module := submission_data.2.1
+  let target_module := target_data.map (fun d => d.2.1) |>.getD submission_module
   let submissionSourceFile ← findLean submission_module
-
-  let targetSourceFile ←
-    if effectiveTarget == submission_module then
-      pure submissionSourceFile
-    else
-      findLean effectiveTarget
-
-  if effectiveTarget == submission_module then
-    getDescriptorForModule timingsRef submission_module (sourceFile? := some submissionSourceFile)
+  if target_module == submission_module then
+    let (decls, failures) ← getDescriptorForModule timingsRef submission_module
+    return ({
+      decls := decls,
+      path := submissionSourceFile,
+      moduleName := submission_module,
+      contents := submission_data.1
+    }, failures)
   else
-    let targetDescriptor ← getDescriptorForModule timingsRef effectiveTarget (sourceFile? := some targetSourceFile)
-    let submittedDescriptor ← getDescriptorForModule timingsRef submission_module targetDescriptor (sourceFile? := some submissionSourceFile)
-    return submittedDescriptor
+    let targetSourceFile ← findLean target_module
+    -- if useCache is true, get and parse descriptor from cache if possible:
+    let extractedTargetDescriptor? : Option FileDescriptor ← if useCache then do
+      let cachePath ← descriptorCachePathForModule target_module
+      if (← isDescriptorCacheFresh target_module cachePath) then
+        let cachedDescriptorStr ← IO.FS.readFile cachePath
+        let cachedDescriptorJson ← match Json.parse cachedDescriptorStr with
+          | Except.ok json => pure json
+          | Except.error err => do
+            IO.eprintln s!"Warning: Failed to parse cached descriptor at {cachePath}: {err}. Will regenerate descriptor from source. Error details: {err}"
+            pure Json.null
+
+        match @FromJson.fromJson? FileDescriptor _ cachedDescriptorJson with
+        | Except.ok desc => pure (some desc)
+        | Except.error err => do
+          IO.eprintln s!"Warning: Failed to parse cached descriptor at {cachePath}: {err}. Will regenerate descriptor from source. Error details: {err}"
+          pure none
+      else do
+        IO.eprintln s!"Cached descriptor at {cachePath} is not fresh. Will regenerate descriptor from source."
+        pure none
+    else pure none
+
+    let (targetDescriptor, targetFailures) ← (match extractedTargetDescriptor? with
+      | some desc => pure (desc, #[])
+      | none => do
+        let (regeneratedDecls, regeneratedFailures) ← getDescriptorForModule timingsRef target_module
+        pure ({
+          decls := regeneratedDecls,
+          path := targetSourceFile,
+          moduleName := target_module,
+          contents := (target_data.getD default).1
+        }, regeneratedFailures) : IO (FileDescriptor × Array CollectedFailure))
+
+    let (submittedDescriptor, submissionFailures) ← getDescriptorForModule timingsRef submission_module targetDescriptor
+    return ({
+      decls := submittedDescriptor,
+      path := submissionSourceFile,
+      moduleName := submission_module,
+      contents := submission_data.1
+    }, mergeFailures targetFailures submissionFailures)
 
 
 
@@ -287,18 +242,16 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   let savePath := args.flag! "save" |>.as! String
   let save? := if savePath == "" then none else some savePath
 
+  let useCache ← parseBoolFlag "use_cache" (args.flag! "use_cache" |>.as! String)
+
   try
     let targetContent? ← withTiming timingsRef "cli.resolveTargetInput" <| do
       target?.mapM (fun t => getFileOrModuleContents t)
 
-    let target_mod? := match targetContent? with
-      | some (_, m, _) => some m
-      | none => none
 
-
-    let (_, sub_mod, _) ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
+    let submissionContent ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
       getFileOrModuleContents submission
-    let descriptor ← getTargets' timingsRef sub_mod target_mod?
+    let (descriptor, failures) ← getTargets' timingsRef submissionContent targetContent? useCache
     let json ← withTiming timingsRef "cli.encodeDescriptorJson" <| do
       pure (ToJson.toJson descriptor)
     if save?.isSome then
@@ -309,10 +262,25 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
       IO.println "<DESCRIPTOR>"
       IO.println json.pretty
       IO.println "</DESCRIPTOR>"
+    if useCache && failures.size == 0 then
+      let cachePath ← descriptorCachePathForModule submissionContent.2.1
+      let _ ← withTiming timingsRef "cli.writeCacheDescriptor" <| do
+        IO.FS.writeFile cachePath (json.pretty)
+      IO.println s!"Wrote cached file descriptor to {cachePath}"
+
+    if failures.size > 0 then
+      let diagnosticsJson ← withTiming timingsRef "cli.encodeDiagnosticsJson" <| do
+        pure (toJson failures).pretty
+      IO.println "<AGORA_DIAGNOSTICS_ALL>"
+      IO.println diagnosticsJson
+      IO.println "</AGORA_DIAGNOSTICS_ALL>"
 
     printTimingSummary timingsRef
-    IO.println "Finished with no errors."
-    return (0 : UInt32)
+    if failures.size > 0 then
+      return (1 : UInt32)
+    else
+      IO.println "Finished with no errors."
+      return (0 : UInt32)
   catch e =>
     printTimingSummary timingsRef
     IO.eprintln s!"Error: {e}"
@@ -326,10 +294,11 @@ unsafe def getTargets : Cmd := `[Cli|
   FLAGS:
     submission : String; "In file mode, the submission module name."
     target : String; "The target module name. Optional; if not provided, then target=submission is assumed."
+    use_cache : String; "If true, then look for cached .descriptor file next to the target .olean. If success, write new .descriptor to submission olean. Default: true."
     save : String; "If provided, save the file descriptor to this file as json to specified path. Default is no save."
 
   EXTENSIONS:
-    defaultValues! #[("target", ""), ("save", "")]
+    defaultValues! #[("target", ""), ("save", ""), ("use_cache", "true")]
 ]
 
 
