@@ -1,8 +1,6 @@
-import Cli.Extensions
-import VerifiedAgora.tagger
-import VerifiedAgora.Frontend
-import VerifiedAgora.TacticInvocation
-open Lean Core Elab IO Meta Term Command Tactic Cli
+import Lean
+
+open Lean
 
 abbrev SerializedExpr := String
 def Lean.Expr.serialize (e : Expr) : SerializedExpr := e.dbgToString

@@ -1,136 +1,7 @@
 import Cli.Extensions
 import VerifiedAgora.tagger
-import VerifiedAgora.Frontend
-import VerifiedAgora.TacticInvocation
-import VerifiedAgora.Utils
-import VerifiedAgora.CollectAxiomsBatched
+import VerifiedAgora.Utils.Utils
 open Lean Core Elab IO Meta Term Command Tactic Cli Environment CollectAxiomsBatched
-
-structure TimingStats where
-  totalMs : Nat := 0
-  count : Nat := 0
-  maxMs : Nat := 0
-  deriving Inhabited
-
-structure TimingState where
-  order : Array String := #[]
-  stats : Std.HashMap String TimingStats := {}
-  deriving Inhabited
-
-def recordTiming (timingsRef : IO.Ref TimingState) (label : String) (elapsedMs : Nat) : IO Unit := do
-  timingsRef.modify fun s =>
-    let existing := s.stats.get? label
-    let prev := existing.getD {}
-    let next : TimingStats := {
-      totalMs := prev.totalMs + elapsedMs
-      count := prev.count + 1
-      maxMs := max prev.maxMs elapsedMs
-    }
-    let order := if existing.isSome then s.order else s.order.push label
-    { order := order, stats := s.stats.insert label next }
-
-def withTiming (timingsRef : IO.Ref TimingState) (label : String) (action : IO α) : IO α := do
-  let start ← IO.monoMsNow
-  try
-    let out ← action
-    let stop ← IO.monoMsNow
-    recordTiming timingsRef label (stop - start)
-    return out
-  catch e =>
-    let stop ← IO.monoMsNow
-    recordTiming timingsRef label (stop - start)
-    throw e
-
-def printTimingSummary (timingsRef : IO.Ref TimingState) : IO Unit := do
-  let timings ← timingsRef.get
-  IO.println "<TIMING_SUMMARY>"
-  let mut totalMeasured : Nat := 0
-  for label in timings.order do
-    if let some stats := timings.stats.get? label then
-      let avg := if stats.count == 0 then 0 else stats.totalMs / stats.count
-      totalMeasured := totalMeasured + stats.totalMs
-      IO.println s!"{label}: total={stats.totalMs}ms count={stats.count} avg={avg}ms max={stats.maxMs}ms"
-  IO.println s!"TOTAL_MEASURED: {totalMeasured}ms"
-  IO.println "</TIMING_SUMMARY>"
-
-structure CollectedFailure where
-  declName : String
-  moduleName : String
-  kind : String
-  summary : String
-  detail : String
-  deriving Inhabited, ToJson
-
-def collectAxiomsRaw (env : Environment) (n : Name) : Array Name :=
-  let (_, s) := (CollectAxioms.collect n).run env |>.run {}
-  s.axioms
-
-def collectAxiomViolations (n : Name) (axioms : Array Name) (allow_sorry? : Bool := false) (moduleName : String := "<unknown>") :
-    Array CollectedFailure := Id.run do
-  let allowedAxioms := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
-  let mut out : Array CollectedFailure := #[]
-  for a in axioms do
-    if a ∉ allowedAxioms then
-      out := out.push {
-        declName := n.toString
-        moduleName := moduleName
-        kind := "disallowed_axiom"
-        summary := s!"A declaration relies on a disallowed axiom."
-        detail := s!"Declaration {n} relies on axiom {a}, which is not in its allowed set ({String.intercalate ", " (allowedAxioms.map Name.toString)})."
-      }
-  out
-
-def validateCollectedAxioms (n : Name) (axioms : Array Name) (allow_sorry? : Bool := false) : IO Unit := do
-  let allowedAxioms := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
-  for a in axioms do
-    if a ∉ allowedAxioms then
-      throw <| diagnosticErrorMessage s!"Declaration relies on disallowed axiom." <| Json.mkObj [
-        ("summary", Json.str s!"A declaration in the attempted contribution relies on a disallowed axiom. Remember, standard declarations must only rely on the allowed set of standard axioms ({String.intercalate ", " (AllowedAxioms.map Name.toString)}) for Agora contributions. Declarations tagged as targets are allowed to additionally rely on \"sorryAx\", but only if the previous proof of said target also relied on \"sorryAx\" - meaning that contributions cannot regress already resolved targets to once again be unresolved."),
-        ("offending axiom", Json.str s!"Declaration {n} relies on axiom {a}, which is not in its allowed set of axioms ({String.intercalate ", " (allowedAxioms.map Name.toString)})")
-      ]
-
-def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap Name DeclarationRanges) := do
-  let ctx := {fileName := "", fileMap := default}
-  let state : Core.State := {env := env}
-  let fn : CoreM (Std.HashMap Name DeclarationRanges) := do
-    let mut out : Std.HashMap Name DeclarationRanges := {}
-    for name in names do
-      let hasDeclRange := (← Lean.findDeclarationRanges? name)
-      let notProjFn := !(← Lean.isProjectionFn name)
-      let notInternal := !name.isInternal
-      match (hasDeclRange, notProjFn, notInternal) with
-      | (some rng, true, true) =>
-        out := out.insert name rng
-      | _ =>
-        pure ()
-    return out
-  let result? ← CoreM.run' fn ctx state |>.toIO'
-  match result?.toOption with
-  | some out => pure out
-  | none => pure {}
-
-instance : Hashable ModuleIdx where
-  hash s := @Hashable.hash Nat _ s
-
-def getConstantsInModules (env : Environment) (mods : Array Name)
-      (includeRoots : Bool := true) : IO (Std.HashMap Name ConstantInfo) := do
-    let mut allowed : Std.HashSet ModuleIdx := {}
-    for m in mods do
-      if let some rootIdx := env.getModuleIdx? m then
-        if includeRoots then
-          allowed := allowed.insert rootIdx
-        if let some md := env.header.moduleData.get? rootIdx.toNat then
-          for imp in md.imports do
-            if let some impIdx := env.getModuleIdx? imp.module then
-              allowed := allowed.insert impIdx
-
-    let mut out : Std.HashMap Name ConstantInfo := {}
-    for (n, ci) in env.constants do
-      if let some owner := env.getModuleIdxFor? n then
-        if allowed.contains owner then
-          out := out.insert n ci
-    pure out
-
 
 /-- Imports the project modules in a single environment and gets all tagged declarations. Requires project to be `lake build`-ed first. -/
 unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) (checkAll? : Bool) :
@@ -169,7 +40,7 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     pure (scanCandidates, dedupNames)
 
   let humanDeclMap ← withTiming timingsRef "descriptor.batchHumanDeclScan" <| do
-    batchHumanDecls namesForHumanScan env
+    batchHumanDecls namesForHumanScan env true
 
   withTiming timingsRef "descriptor.validateHumanDeclSafety" <| do
     for (n, ci) in scanCandidates do
