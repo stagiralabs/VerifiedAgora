@@ -99,7 +99,7 @@ def equivThm (cinfo₁ cinfo₂ : ConstantData) : Bool := Id.run do
   let .thmData tval₁ := cinfo₁ | false
   let .thmData tval₂ := cinfo₂ | false
   return tval₁.name == tval₂.name
-    && tval₁.type == tval₂.type
+    && tval₁.typeKey == tval₂.typeKey
     && tval₁.levelParams == tval₂.levelParams
 
 /-
@@ -111,39 +111,17 @@ def equivDefn (ctarget cnew : ConstantData)(checkVal:Bool:=false) : Bool := Id.r
   let .defnData tval₂ := cnew | false
 
   return tval₁.name == tval₂.name
-    && tval₁.type == tval₂.type
+    && tval₁.typeKey == tval₂.typeKey
     && tval₁.levelParams == tval₂.levelParams
     && tval₁.all == tval₂.all
     && tval₁.safety == tval₂.safety
-    && (if checkVal then tval₁.value==tval₂.value else true)
+    && (if checkVal then tval₁.valueKey == tval₂.valueKey else true)
 
-def normalizeSerializedExprForModules (s : String) (submissionMod : Name) (targetMod? : Option Name) : String :=match targetMod? with
-  | none => s
-  | some targetMod =>
-    let s := s.replace submissionMod.toString "<MODULE>"
-    s.replace targetMod.toString "<MODULE>"
+def equivThmDataNormalized (a b : ConstantData) (_submissionMod : Name) (_targetMod? : Option Name) : Bool :=
+  equivThm a b
 
-def equivThmDataNormalized (a b : ConstantData) (submissionMod : Name) (targetMod? : Option Name) : Bool := match a, b with
-  | .thmData t1, .thmData t2 =>
-      t1.name == t2.name &&
-      normalizeSerializedExprForModules t1.type submissionMod targetMod? ==
-        normalizeSerializedExprForModules t2.type submissionMod targetMod? &&
-      t1.levelParams == t2.levelParams
-  | _, _ => false
-
-def equivDefnDataNormalized (a b : ConstantData) (submissionMod : Name) (targetMod? : Option Name) (checkVal : Bool := false) : Bool := match a, b with
-  | .defnData d1, .defnData d2 =>
-      d1.name == d2.name &&
-      normalizeSerializedExprForModules d1.type submissionMod targetMod? ==
-        normalizeSerializedExprForModules d2.type submissionMod targetMod? &&
-      d1.levelParams == d2.levelParams &&
-      d1.all == d2.all &&
-      d1.safety == d2.safety &&
-      (if checkVal then
-        normalizeSerializedExprForModules d1.value submissionMod targetMod? ==
-          normalizeSerializedExprForModules d2.value submissionMod targetMod?
-      else true)
-  | _, _ => false
+def equivDefnDataNormalized (a b : ConstantData) (_submissionMod : Name) (_targetMod? : Option Name) (checkVal : Bool := false) : Bool :=
+  equivDefn a b checkVal
 
 
 

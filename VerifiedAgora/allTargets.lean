@@ -53,9 +53,32 @@ def printTimingSummary (timingsRef : IO.Ref TimingState) : IO Unit := do
   IO.println s!"TOTAL_MEASURED: {totalMeasured}ms"
   IO.println "</TIMING_SUMMARY>"
 
+structure CollectedFailure where
+  declName : String
+  moduleName : String
+  kind : String
+  summary : String
+  detail : String
+  deriving Inhabited, ToJson
+
 def collectAxiomsRaw (env : Environment) (n : Name) : Array Name :=
   let (_, s) := (CollectAxioms.collect n).run env |>.run {}
   s.axioms
+
+def collectAxiomViolations (n : Name) (axioms : Array Name) (allow_sorry? : Bool := false) (moduleName : String := "<unknown>") :
+    Array CollectedFailure := Id.run do
+  let allowedAxioms := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
+  let mut out : Array CollectedFailure := #[]
+  for a in axioms do
+    if a ∉ allowedAxioms then
+      out := out.push {
+        declName := n.toString
+        moduleName := moduleName
+        kind := "disallowed_axiom"
+        summary := s!"A declaration relies on a disallowed axiom."
+        detail := s!"Declaration {n} relies on axiom {a}, which is not in its allowed set ({String.intercalate ", " (allowedAxioms.map Name.toString)})."
+      }
+  out
 
 def validateCollectedAxioms (n : Name) (axioms : Array Name) (allow_sorry? : Bool := false) : IO Unit := do
   let allowedAxioms := if allow_sorry? then TargetsAllowedAxioms else AllowedAxioms
@@ -110,7 +133,8 @@ def getConstantsInModules (env : Environment) (mods : Array Name)
 
 
 /-- Imports the project modules in a single environment and gets all tagged declarations. Requires project to be `lake build`-ed first. -/
-unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) (checkAll? : Bool) : IO (List FileDescriptor) := do
+unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) (checkAll? : Bool) :
+    IO (List FileDescriptor × Array CollectedFailure) := do
   let env ← withTiming timingsRef "descriptor.importDependencies" <| do
     let imports := importMods.map (fun mod => ({ module := mod } : Import))
     importModules imports {} 0
@@ -120,6 +144,7 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
       if TagAttribute.hasTag targetAttribute env k then ci :: acc else acc
     ) []
   let tagged_decl_names := tagged_decls.map (fun ci => ci.name) |>.foldl (·.insert ·) Std.HashSet.empty
+  let failuresRef ← IO.mkRef (#[] : Array CollectedFailure)
 
   let (scanCandidates, namesForHumanScan) ← withTiming timingsRef "descriptor.scanDeclarations" <| do
     let mut scanCandidates : Array (Name × ConstantInfo) := #[]
@@ -155,10 +180,16 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
               | .safe => "safe"
               | .unsafe => "unsafe"
               | .partial => "partial"
-            throw <| diagnosticErrorMessage s!"unsafe/partial declaration detected" <| Json.mkObj [
-              ("summary", Json.str "The attempted contribution contains unsafe or partial declarations, which are not allowed. Please change the declaration to be safe/total or remove it from the submission/target."),
-              ("offending declaration", Json.str s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\".")
-            ]
+            let moduleName := match env.getModuleIdxFor? n with
+              | some idx => (env.header.moduleNames.get! idx).toString
+              | none => "<unknown>"
+            failuresRef.modify (fun failures => failures.push {
+              declName := n.toString
+              moduleName := moduleName
+              kind := "unsafe_partial"
+              summary := "The declaration is unsafe or partial."
+              detail := s!"Declaration {n} ({ci.kind}) has safety \"{str_safety}\"."
+            })
 
   let sourceFileCacheRef ← IO.mkRef ({} : Std.HashMap Name System.FilePath)
   let ret : Array (DeclarationDescriptor × (Option Name) × DeclarationRanges) ← withTiming timingsRef "descriptor.buildDescriptorSeed" <| do
@@ -178,7 +209,7 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
               pure (some declMod)
           | none => pure none
         ret := ret.push ({
-          ci := .fromConstantInfo ci,
+          ci := .fromConstantInfo (mod?.getD default) ci,
           contents := default,
           context := default,
           axioms := default,
@@ -211,7 +242,9 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     let axioms := match axiomMap.get? desc.ci.name with
       | some a => a
       | none => collectAxiomsRaw env desc.ci.name
-    validateCollectedAxioms desc.ci.name axioms (tagged_decl_names.contains desc.ci.name)
+    let moduleName := mod?.map Name.toString |>.getD "<unknown>"
+    let axiomFailures := collectAxiomViolations desc.ci.name axioms (tagged_decl_names.contains desc.ci.name) moduleName
+    failuresRef.modify (fun failures => failures ++ axiomFailures)
 
     out := out.push ({
       desc with
@@ -240,7 +273,8 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     { decls := decls.toList, path := path, moduleName := mod, contents := contents }
   )
 
-  return out''.toList
+  let failures ← failuresRef.get
+  return (out''.toList, failures)
 
 
 
@@ -275,7 +309,8 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   let appBuildLib := (← IO.appDir).parent.get! / "lib"
   let runtimeSearchPath :=
     if appBuildLib ∈ runtimeSearchPath then runtimeSearchPath else runtimeSearchPath ++ [appBuildLib]
-  searchPathRef.set (runtimeSearchPath ++ compile_time_search_path%)
+  let merged ← Lean.addSearchPathFromEnv (runtimeSearchPath ++ compile_time_search_path%)
+  searchPathRef.set merged
   enableInitializersExecution
 
   try
@@ -299,7 +334,7 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
     let checkFiles? := (args.flag! "check_all" |>.as! String).trim.toLower == "true"
 
 
-    let descriptors ← getAllTargetsInProject timingsRef importMods checkFiles?
+    let (descriptors, failures) ← getAllTargetsInProject timingsRef importMods checkFiles?
 
     let json ← withTiming timingsRef "cli.encodeDescriptorJson" <| do
       pure (toJson descriptors).pretty
@@ -307,8 +342,19 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
     IO.println "<DESCRIPTOR>"
     IO.println json
     IO.println "</DESCRIPTOR>"
+
+    if failures.size > 0 then
+      let diagnosticsJson ← withTiming timingsRef "cli.encodeDiagnosticsJson" <| do
+        pure (toJson failures).pretty
+      IO.println "<AGORA_DIAGNOSTICS_ALL>"
+      IO.println diagnosticsJson
+      IO.println "</AGORA_DIAGNOSTICS_ALL>"
+
     printTimingSummary timingsRef
-    return (0 : UInt32)
+    if failures.size > 0 then
+      return (1 : UInt32)
+    else
+      return (0 : UInt32)
   catch e =>
     printTimingSummary timingsRef
     IO.eprintln s!"Error: {e}"
