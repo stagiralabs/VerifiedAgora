@@ -65,27 +65,17 @@ def checkAxioms (env: Environment) (n: Name) (allow_sorry? : Bool := false) : IO
       -- throw <| IO.userError s!"{a} is not in the allowed set of standard axioms ({n})"
   return s.axioms
 
--- /-- Returns `(usesSorry, disallowedAxioms, syntheticMsgs)` for declaration `n` in `env`.
--- Synthetic messages classify `sorryAx` as warning and disallowed axioms as error. -/
--- def axiomAudit (env : Environment) (n : Name) :
---     (Bool × Array Name × List (MessageSeverity × String)) := Id.run do
---   let (_, s) := (CollectAxioms.collect n).run env |>.run {}
---   let axioms := s.axioms
 
---   let usesSorry := axioms.contains `sorryAx
---   let disallowed := axioms.filter (fun a => a ∉ TargetsAllowedAxioms)
+def Lean.ConstantInfo.kind (cd : ConstantInfo) : String := match cd with
+  | .axiomInfo  _ => "axiom"
+  | .defnInfo   _ => "def"
+  | .thmInfo    _ => "theorem"
+  | .opaqueInfo _ => "opaque"
+  | .quotInfo   _ => "quot"
+  | .inductInfo _ => "inductive"
+  | .ctorInfo   _ => "constructor"
+  | .recInfo    _ => "recursor"
 
---   let mut msgs : List (MessageSeverity × String) := []
---   if usesSorry then
---     msgs := msgs ++ [(MessageSeverity.warning, "[Agora Warning] relies on sorryAx")]
-
---   if disallowed.size > 0 then
---     msgs := msgs ++ [(
---       MessageSeverity.error,
---       s!"[Agora Error] relies on disallowed axioms: {String.intercalate ", " (disallowed.toList.map Name.toString)}"
---     )]
-
---   (usesSorry, disallowed, msgs)
 
 /-- Removes duplicate `(severity, message)` pairs while preserving order. -/
 def dedupMessages (msgs : List (MessageSeverity × String)) : List (MessageSeverity × String) :=
@@ -93,7 +83,7 @@ def dedupMessages (msgs : List (MessageSeverity × String)) : List (MessageSever
 
 structure Info where
   name: Name
-  constInfo: ConstantInfo
+  constInfo: ConstantData
   axioms: Array Name
   --nonComputable: Bool
 
@@ -105,9 +95,9 @@ instance : Inhabited _root_.Info where
 From Lean.Environment
 Check if two theorems have the same type and name
 -/
-def equivThm (cinfo₁ cinfo₂ : ConstantInfo) : Bool := Id.run do
-  let .thmInfo tval₁ := cinfo₁ | false
-  let .thmInfo tval₂ := cinfo₂ | false
+def equivThm (cinfo₁ cinfo₂ : ConstantData) : Bool := Id.run do
+  let .thmData tval₁ := cinfo₁ | false
+  let .thmData tval₂ := cinfo₂ | false
   return tval₁.name == tval₂.name
     && tval₁.type == tval₂.type
     && tval₁.levelParams == tval₂.levelParams
@@ -116,9 +106,9 @@ def equivThm (cinfo₁ cinfo₂ : ConstantInfo) : Bool := Id.run do
 Check if two definitions have the same type and name.
 If checkVal is true, then also check their values are the same
 -/
-def equivDefn (ctarget cnew : ConstantInfo)(checkVal:Bool:=false) : Bool := Id.run do
-  let .defnInfo tval₁ := ctarget | false
-  let .defnInfo tval₂ := cnew | false
+def equivDefn (ctarget cnew : ConstantData)(checkVal:Bool:=false) : Bool := Id.run do
+  let .defnData tval₁ := ctarget | false
+  let .defnData tval₂ := cnew | false
 
   return tval₁.name == tval₂.name
     && tval₁.type == tval₂.type
@@ -126,6 +116,34 @@ def equivDefn (ctarget cnew : ConstantInfo)(checkVal:Bool:=false) : Bool := Id.r
     && tval₁.all == tval₂.all
     && tval₁.safety == tval₂.safety
     && (if checkVal then tval₁.value==tval₂.value else true)
+
+def normalizeSerializedExprForModules (s : String) (submissionMod : Name) (targetMod? : Option Name) : String :=match targetMod? with
+  | none => s
+  | some targetMod =>
+    let s := s.replace submissionMod.toString "<MODULE>"
+    s.replace targetMod.toString "<MODULE>"
+
+def equivThmDataNormalized (a b : ConstantData) (submissionMod : Name) (targetMod? : Option Name) : Bool := match a, b with
+  | .thmData t1, .thmData t2 =>
+      t1.name == t2.name &&
+      normalizeSerializedExprForModules t1.type submissionMod targetMod? ==
+        normalizeSerializedExprForModules t2.type submissionMod targetMod? &&
+      t1.levelParams == t2.levelParams
+  | _, _ => false
+
+def equivDefnDataNormalized (a b : ConstantData) (submissionMod : Name) (targetMod? : Option Name) (checkVal : Bool := false) : Bool := match a, b with
+  | .defnData d1, .defnData d2 =>
+      d1.name == d2.name &&
+      normalizeSerializedExprForModules d1.type submissionMod targetMod? ==
+        normalizeSerializedExprForModules d2.type submissionMod targetMod? &&
+      d1.levelParams == d2.levelParams &&
+      d1.all == d2.all &&
+      d1.safety == d2.safety &&
+      (if checkVal then
+        normalizeSerializedExprForModules d1.value submissionMod targetMod? ==
+          normalizeSerializedExprForModules d2.value submissionMod targetMod?
+      else true)
+  | _, _ => false
 
 
 
@@ -136,8 +154,8 @@ structure DeclarationDescriptor where
   axioms : Array Name
   target? : Bool
   resolved? : Bool
-  sourceFile? : Option System.FilePath
   deriving Inhabited, BEq
+
 
 
 def DeclarationDescriptor.toJson (desc : DeclarationDescriptor) : Json :=
@@ -145,11 +163,6 @@ def DeclarationDescriptor.toJson (desc : DeclarationDescriptor) : Json :=
     Json.mkObj [
     ("name", Json.str desc.ci.name.toString),
     ("kind", Json.str desc.ci.kind),
-    ("sourceFile", Json.str (match desc.sourceFile? with
-      | some fp => toString (fp.normalize)
-      | none    => "<unknown>"
-      )
-    ),
     ("contents", Json.str desc.contents),
     ("target?", Json.bool desc.target?),
     ("context", Json.str desc.context),
@@ -165,9 +178,9 @@ def DeclarationDescriptor.fromJson (json : Json) : Except String DeclarationDesc
   let context ← json.getObjValAs? String "context"
   let target? ← json.getObjValAs? Bool "target?"
   let resolved? ← json.getObjValAs? Bool "resolved?"
-  let sourceFile? := match (← json.getObjValAs? (Option String) "sourceFile") with
-    | some s => some (System.FilePath.mk s)
-    | none   => none
+  -- let sourceFile? := match (← json.getObjValAs? (Option String) "sourceFile") with
+  --   | some s => some (System.FilePath.mk s)
+  --   | none   => none
   let axiomsJson ← json.getObjValAs? (Array Json) "axioms"
   let axioms ← axiomsJson.mapM (fun axJson => do
     let axStr ← axJson.getStr?
@@ -182,7 +195,7 @@ def DeclarationDescriptor.fromJson (json : Json) : Except String DeclarationDesc
     context := context,
     target? := target?,
     resolved? := resolved?,
-    sourceFile? := sourceFile?,
+    -- sourceFile? := sourceFile?,
     axioms := axioms
   }
 
@@ -197,4 +210,10 @@ instance : ToString DeclarationDescriptor where
 
 
 
-abbrev FileDescriptor := List DeclarationDescriptor
+-- abbrev FileDescriptor := List DeclarationDescriptor
+structure FileDescriptor where
+  decls : List DeclarationDescriptor
+  path : System.FilePath
+  moduleName : Name
+  contents : String
+  deriving Inhabited, BEq, ToJson, FromJson

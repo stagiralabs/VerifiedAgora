@@ -87,7 +87,7 @@ def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap N
 
 
 /-- Imports the project modules in a single environment and gets all tagged declarations. Requires project to be `lake build`-ed first. -/
-unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) : IO FileDescriptor := do
+unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) : IO (List FileDescriptor) := do
   let env ← withTiming timingsRef "descriptor.importDependencies" <| do
     let imports := importMods.map (fun mod => ({ module := mod } : Import))
     importModules imports {} 0
@@ -130,49 +130,51 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
             ]
 
   let sourceFileCacheRef ← IO.mkRef ({} : Std.HashMap Name System.FilePath)
-  let ret : Array (DeclarationDescriptor × DeclarationRanges) ← withTiming timingsRef "descriptor.buildDescriptorSeed" <| do
-    let mut ret : Array (DeclarationDescriptor × DeclarationRanges) := #[]
+  let ret : Array (DeclarationDescriptor × (Option Name) × DeclarationRanges) ← withTiming timingsRef "descriptor.buildDescriptorSeed" <| do
+    let mut ret : Array (DeclarationDescriptor × (Option Name) × DeclarationRanges) := #[]
     for (n, ci) in scanCandidates do
       if let some rng := humanDeclMap.get? n then
-        let sourceFile? ←
+        let mod? ←
           match env.getModuleIdxFor? n with
           | some modidx =>
             let declMod := env.header.moduleNames.get! modidx
             let sourceFileCache ← sourceFileCacheRef.get
             match sourceFileCache.get? declMod with
-            | some fp => pure (some fp)
+            | some _ => pure (some declMod)
             | none =>
               let fp ← findLean declMod
               sourceFileCacheRef.modify (fun m => m.insert declMod fp)
-              pure (some fp)
+              pure (some declMod)
           | none => pure none
         ret := ret.push ({
-          ci := ci,
+          ci := .fromConstantInfo ci,
           contents := default,
           context := default,
           axioms := default,
           target? := true,
-          resolved? := default,
-          sourceFile? := sourceFile?
-        }, rng)
+          resolved? := default
+        }, mod?, rng)
     pure ret
 
   let axiomMap : Std.HashMap Name (Array Name) ← withTiming timingsRef "descriptor.precomputeAxioms" <| do
-    let names := ret.map (fun (desc, _) => desc.ci.name)
+    let names := ret.map (fun (desc, _, _) => desc.ci.name)
     pure (collectAxiomsBatched env names)
 
   let mut loadedFileMaps : Std.HashMap System.FilePath FileMap := {}
-  let mut out : Array DeclarationDescriptor := #[]
-  for (desc, rng) in ret do
-    let source ← match desc.sourceFile? with
-    | some fp =>
-      match loadedFileMaps.get? fp with
-      | some fm => pure fm
-      | none => do
-        let fm ← withTiming timingsRef "descriptor.loadSourceFile" <| do
-          pure <| FileMap.ofString (← IO.FS.readFile fp)
-        loadedFileMaps := loadedFileMaps.insert fp fm
-        pure fm
+  let mut out : Array (DeclarationDescriptor × Name) := #[]
+  for (desc, mod?, rng) in ret do
+    let source ← match mod? with
+    | some mod => do
+      let fp? := (← sourceFileCacheRef.get).get? mod
+      match fp? with
+      | some fp => match loadedFileMaps.get? fp with
+        | some fm => pure fm
+        | none => do
+          let fm ← withTiming timingsRef "descriptor.loadSourceFile" <| do
+            pure <| FileMap.ofString (← IO.FS.readFile fp)
+          loadedFileMaps := loadedFileMaps.insert fp fm
+          pure fm
+      | none => pure default
     | none => pure default
 
     let axioms := match axiomMap.get? desc.ci.name with
@@ -180,15 +182,34 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
       | none => collectAxiomsRaw env desc.ci.name
     validateCollectedAxioms desc.ci.name axioms true
 
-    out := out.push {
+    out := out.push ({
       desc with
-      contents := Substring.mk source.source (source.ofPosition rng.range.pos) (source.ofPosition rng.range.endPos),
-      context := Substring.mk source.source ⟨0⟩ (source.ofPosition rng.range.pos),
+      contents := Substring.mk source.source (source.ofPosition rng.range.pos) (source.ofPosition rng.range.endPos) |>.toString,
+      context := Substring.mk source.source ⟨0⟩ (source.ofPosition rng.range.pos) |>.toString,
       axioms := axioms,
       resolved? := axioms.all (fun a => a ∈ AllowedAxioms)
-    }
+    }, mod?.getD default)
 
-  return out.toList
+  let out' : Array (DeclarationDescriptor × Name × System.FilePath × String) ← out.mapM (fun (desc, mod) => do
+    let fp := (← sourceFileCacheRef.get).get? mod |>.getD default
+    let contents := match loadedFileMaps[fp]? with
+      | some fm => fm.source
+      | none => default
+    pure (desc, mod, fp, contents)
+    )
+
+  let out'' := out'.groupByKey (fun (_, mod, _, _) => mod) |>.toArray.map (fun (mod, vals) =>
+    let decls := vals.map (fun (desc, _, _, _) => desc)
+    let path := match vals[0]? with
+      | some (_, _, fp, _) => fp
+      | none => default
+    let contents := match vals[0]? with
+      | some (_, _, _, contents) => contents
+      | none => default
+    { decls := decls.toList, path := path, moduleName := mod, contents := contents }
+  )
+
+  return out''.toList
 
 
 

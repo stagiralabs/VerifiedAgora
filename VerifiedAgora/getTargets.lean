@@ -58,6 +58,34 @@ def printExpr (ex : Expr) (env : Environment) : IO Format := do
   let ctx:={fileName:="", fileMap:=default}
   Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr ex) ctx {env:=env})
 
+
+
+def parseBoolFlag (flagName : String) (raw : String) : IO Bool := do
+  match raw.trim.toLower with
+  | "true" => pure true
+  | "false" => pure false
+  | _ => throw <| IO.userError s!"Invalid boolean value for --{flagName}: \"{raw}\". Expected true or false."
+
+def descriptorCachePathForModule (mod : Name) : IO System.FilePath := do
+  pure ((← findOLean mod).withExtension "descriptor")
+
+def systemTimeLe (a b : IO.FS.SystemTime) : Bool :=
+  a.sec < b.sec || (a.sec == b.sec && a.nsec <= b.nsec)
+
+def isDescriptorCacheFresh (mod : Name) (descriptorPath : System.FilePath) : IO Bool := do
+  if !(← descriptorPath.pathExists) then
+    -- IO.println s!"Descriptor cache file {descriptorPath} does not exist."
+    return false
+  try
+    let descriptorMeta ← descriptorPath.metadata
+    let sourceMeta ← (← findLean mod).metadata
+    let oleanMeta ← (← findOLean mod).metadata
+    let t := descriptorMeta.modified
+    -- IO.println s!"Descriptor cache modified at {t.sec}, source modified at {sourceMeta.modified.sec}, olean modified at {oleanMeta.modified.sec}."
+    return systemTimeLe sourceMeta.modified t && systemTimeLe oleanMeta.modified t
+  catch _ =>
+    return false
+
 def collectAxiomsRaw (env : Environment) (n : Name) : Array Name :=
   let (_, s) := (CollectAxioms.collect n).run env |>.run {}
   s.axioms
@@ -103,7 +131,7 @@ def getConstantsInModule (env : Environment) (mod : Name): IO (Std.HashMap Name 
       ciMap := ciMap.insert n ci
   pure ciMap
 
-def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targetDescriptor? : Option FileDescriptor := none) (sourceFile? : Option System.FilePath := none) : IO FileDescriptor := do
+def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targetDescriptor? : Option FileDescriptor := none) : IO (List DeclarationDescriptor) := do
 
   let modStr := mod.toString
 
@@ -135,7 +163,7 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
       if ci.kind ∈ ["theorem", "def"] then
         scanCandidates := scanCandidates.push (n, ci)
         namesForHumanScan := namesForHumanScan.push n
-    for target in targetDescriptor?.getD [] do
+    for target in (targetDescriptor?.getD default).decls do
       namesForHumanScan := namesForHumanScan.push target.ci.name
 
     let mut dedupNames : Array Name := #[]
@@ -168,11 +196,11 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     for (n, ci) in scanCandidates do
       if let some rng := humanDeclMap.get? n then
         ret := ret.push ({
-          ci := ci,
+          ci := .fromConstantInfo ci,
           contents := default, -- we fill this in later since we need the file map for it
           context := default, -- we fill this in later since we need the file map for it
           target? := tagged_decl_names.contains n,
-          sourceFile? := sourceFile?,
+          -- sourceFile? := sourceFile?,
           axioms := default, -- we fill this in later when we do regression and axiom checking
           resolved? := default -- same
         }, rng)
@@ -182,14 +210,13 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
     let names := ret.map (fun (desc, _) => desc.ci.name)
     return collectAxiomsBatched env'' names
 
-  let exprPrinter (e : Expr) := printExpr e env''
-
-  if (targetDescriptor?.getD []).length > 0 then
+  if (targetDescriptor?.getD default).decls.length > 0 then
     axiomMap ← withTiming timingsRef s!"descriptor.compareAgainstTarget[{modStr}]" <| do
       let mut axiomMap := axiomMap
-      for target in targetDescriptor?.getD [] do
+      for target in (targetDescriptor?.getD default).decls do
         if (humanDeclMap.get? target.ci.name).isSome then
-          if let some ci' := ciMap.get? target.ci.name then
+          if let some ci'_info := ciMap.get? target.ci.name then
+            let ci' := .fromConstantInfo ci'_info
             if target.ci.kind ≠ ci'.kind then
               throw <| diagnosticErrorMessage s!"Declaration kind mismatch between current and attempted contribution" <|
               Json.mkObj [
@@ -197,20 +224,20 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
                 ("offending declaration", Json.str s!"Declaration {target.ci.name} has kind \"{ci'.kind}\" in the attempted contribution, but is expected to have kind \"{target.ci.kind}\".")
               ]
             if ci'.kind=="theorem" then
-              if Not (equivThm target.ci ci') then
+              if Not (equivThmDataNormalized target.ci ci' mod (targetDescriptor?.map FileDescriptor.moduleName)) then
                 throw <| diagnosticErrorMessage s!"Theorem statement mismatch between current and attempted contribution" <|
                 Json.mkObj [
                   ("summary", Json.str "A theorem statement in the attempted contribution does not match the corresponding theorem statement in the current version. Please ensure that the statement (type, name, etc.) of the theorem is exactly the same as in the current version."),
-                  ("offending declaration", Json.str s!"Theorem {target.ci.name} has type \"{← exprPrinter ci'.type}\" in the attempted contribution, but is expected to have type \"{← exprPrinter target.ci.type}\".")
+                  ("offending declaration", Json.str s!"Theorem {target.ci.name} has type \"{ci'.type}\" in the attempted contribution, but is expected to match the type of: \n\n{target.ci.type}.")
                 ]
             if ci'.kind=="def" then
-              if Not (equivDefn target.ci ci' (`sorryAx ∉ target.axioms)) then
+              if Not (equivDefnDataNormalized target.ci ci' mod (targetDescriptor?.map FileDescriptor.moduleName) (`sorryAx ∉ target.axioms)) then
                 let valStr ← if `sorryAx ∉ target.axioms then
-                  pure s!" \n\nAdditionally, the definitions have the following values:\n\nThe attempted contribution has value: \"{← exprPrinter ci'.value!}\"\n\nThe contribution is expected to have value: \"{← exprPrinter target.ci.value!}\""
+                  pure s!" \n\nAdditionally, the definitions have the following values:\n\nThe attempted contribution has value: \"{ci'.value?.get!}\"\n\nThe contribution is expected to have same value as: \"{target.ci.value?.get!}\""
                 else pure ""
                 throw <| diagnosticErrorMessage s!"Definition statement mismatch between current and attempted contribution" <| Json.mkObj [
                   ("summary", Json.str "A definition statement in the attempted contribution does not match the corresponding definition statement in the current version. Please ensure that the statement (type, name, etc.) of the definition is exactly the same as in the current version. Additionally, unless the definition's value relies on the `sorry` axiom, the value of the definition must also be exactly the same."),
-                  ("offending declaration", Json.str <| s!"Definition {target.ci.name} has type:\n\n \"{← exprPrinter ci'.type}\" \n\nin the attempted contribution, and is expected to have type \n\n \"{← exprPrinter target.ci.type}\"" ++ valStr)
+                  ("offending declaration", Json.str <| s!"Definition {target.ci.name} has type:\n\n \"{ci'.type}\" \n\nin the attempted contribution, and is expected to have the same type as: \n\n \"{target.ci.type}\"" ++ valStr)
                 ]
 
             let allow_sorry? := target.ci.name ∈ tagged_decl_names && (`sorryAx ∈ target.axioms)
@@ -241,8 +268,8 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
         | none => collectAxiomsRaw env'' desc.ci.name
       validateCollectedAxioms desc.ci.name axioms desc.target?
       pure {desc with
-        contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos),
-        context := Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos),
+        contents := Substring.mk fileMap.source (fileMap.ofPosition rng.range.pos) (fileMap.ofPosition rng.range.endPos) |>.toString,
+        context := Substring.mk fileMap.source ⟨0⟩ (fileMap.ofPosition rng.range.pos) |>.toString,
         axioms := axioms,
         resolved? := axioms.all (fun a => a ∈ AllowedAxioms) -- we consider a declaration resolved if it relies only on allowed axioms, meaning it doesn't rely on sorry or any disallowed axioms
       })
@@ -250,23 +277,62 @@ def getDescriptorForModule (timingsRef : IO.Ref TimingState) (mod : Name) (targe
   return output.toList
 
 unsafe def getTargets' (timingsRef : IO.Ref TimingState)
-    (submission_module : Name)
-    (target_module : Option Name := none) : IO FileDescriptor := do
-  let effectiveTarget := target_module.getD submission_module
+    (submission_data : (String × Name × System.FilePath))
+    (target_data : Option (String × Name × System.FilePath) := none)
+    (useCache : Bool := true)
+    : IO FileDescriptor := do
+  let submission_module := submission_data.2.1
+  let target_module := target_data.map (fun d => d.2.1) |>.getD submission_module
   let submissionSourceFile ← findLean submission_module
-
-  let targetSourceFile ←
-    if effectiveTarget == submission_module then
-      pure submissionSourceFile
-    else
-      findLean effectiveTarget
-
-  if effectiveTarget == submission_module then
-    getDescriptorForModule timingsRef submission_module (sourceFile? := some submissionSourceFile)
+  if target_module == submission_module then
+    let decls ← getDescriptorForModule timingsRef submission_module
+    return {
+      decls := decls,
+      path := submissionSourceFile,
+      moduleName := submission_module,
+      contents := submission_data.1
+    }
   else
-    let targetDescriptor ← getDescriptorForModule timingsRef effectiveTarget (sourceFile? := some targetSourceFile)
-    let submittedDescriptor ← getDescriptorForModule timingsRef submission_module targetDescriptor (sourceFile? := some submissionSourceFile)
-    return submittedDescriptor
+    let targetSourceFile ← findLean target_module
+    -- if useCache is true, get and parse descriptor from cache if possible:
+    let extractedTargetDescriptor? : Option FileDescriptor ← if useCache then do
+      let cachePath ← descriptorCachePathForModule target_module
+      if (← isDescriptorCacheFresh target_module cachePath) then
+        let cachedDescriptorStr ← IO.FS.readFile cachePath
+        let cachedDescriptorJson ← match Json.parse cachedDescriptorStr with
+          | Except.ok json => pure json
+          | Except.error err => do
+            IO.eprintln s!"Warning: Failed to parse cached descriptor at {cachePath}: {err}. Will regenerate descriptor from source. Error details: {err}"
+            pure Json.null
+
+        match @FromJson.fromJson? FileDescriptor _ cachedDescriptorJson with
+        | Except.ok desc => pure (some desc)
+        | Except.error err => do
+          IO.eprintln s!"Warning: Failed to parse cached descriptor at {cachePath}: {err}. Will regenerate descriptor from source. Error details: {err}"
+          pure none
+      else do
+        IO.eprintln s!"Cached descriptor at {cachePath} is not fresh. Will regenerate descriptor from source."
+        pure none
+    else pure none
+
+    let targetDescriptor : FileDescriptor ← match extractedTargetDescriptor? with
+      | some desc => pure desc
+      | none => do
+        let regeneratedDecls ← getDescriptorForModule timingsRef target_module
+        pure {
+          decls := regeneratedDecls,
+          path := targetSourceFile,
+          moduleName := target_module,
+          contents := (target_data.getD default).1
+        }
+
+    let submittedDescriptor ← getDescriptorForModule timingsRef submission_module targetDescriptor
+    return {
+      decls := submittedDescriptor,
+      path := submissionSourceFile,
+      moduleName := submission_module,
+      contents := submission_data.1
+    }
 
 
 
@@ -287,18 +353,16 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
   let savePath := args.flag! "save" |>.as! String
   let save? := if savePath == "" then none else some savePath
 
+  let useCache ← parseBoolFlag "use_cache" (args.flag! "use_cache" |>.as! String)
+
   try
     let targetContent? ← withTiming timingsRef "cli.resolveTargetInput" <| do
       target?.mapM (fun t => getFileOrModuleContents t)
 
-    let target_mod? := match targetContent? with
-      | some (_, m, _) => some m
-      | none => none
 
-
-    let (_, sub_mod, _) ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
+    let submissionContent ← withTiming timingsRef "cli.resolveSubmissionInput" <| do
       getFileOrModuleContents submission
-    let descriptor ← getTargets' timingsRef sub_mod target_mod?
+    let descriptor ← getTargets' timingsRef submissionContent targetContent? useCache
     let json ← withTiming timingsRef "cli.encodeDescriptorJson" <| do
       pure (ToJson.toJson descriptor)
     if save?.isSome then
@@ -309,6 +373,11 @@ unsafe def getTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
       IO.println "<DESCRIPTOR>"
       IO.println json.pretty
       IO.println "</DESCRIPTOR>"
+    if useCache then
+      let cachePath ← descriptorCachePathForModule submissionContent.2.1
+      let _ ← withTiming timingsRef "cli.writeCacheDescriptor" <| do
+        IO.FS.writeFile cachePath (json.pretty)
+      IO.println s!"Wrote cached file descriptor to {cachePath}"
 
     printTimingSummary timingsRef
     IO.println "Finished with no errors."
@@ -326,10 +395,11 @@ unsafe def getTargets : Cmd := `[Cli|
   FLAGS:
     submission : String; "In file mode, the submission module name."
     target : String; "The target module name. Optional; if not provided, then target=submission is assumed."
+    use_cache : String; "If true, then look for cached .descriptor file next to the target .olean. If success, write new .descriptor to submission olean. Default: true."
     save : String; "If provided, save the file descriptor to this file as json to specified path. Default is no save."
 
   EXTENSIONS:
-    defaultValues! #[("target", ""), ("save", "")]
+    defaultValues! #[("target", ""), ("save", ""), ("use_cache", "true")]
 ]
 
 
