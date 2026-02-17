@@ -74,8 +74,9 @@ def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap N
     for name in names do
       let hasDeclRange := (← Lean.findDeclarationRanges? name)
       let notProjFn := !(← Lean.isProjectionFn name)
-      match (hasDeclRange, notProjFn) with
-      | (some rng, true) =>
+      let notInternal := !name.isInternal
+      match (hasDeclRange, notProjFn, notInternal) with
+      | (some rng, true, true) =>
         out := out.insert name rng
       | _ =>
         pure ()
@@ -85,9 +86,31 @@ def batchHumanDecls (names : Array Name) (env : Environment) : IO (Std.HashMap N
   | some out => pure out
   | none => pure {}
 
+instance : Hashable ModuleIdx where
+  hash s := @Hashable.hash Nat _ s
+
+def getConstantsInModules (env : Environment) (mods : Array Name)
+      (includeRoots : Bool := true) : IO (Std.HashMap Name ConstantInfo) := do
+    let mut allowed : Std.HashSet ModuleIdx := {}
+    for m in mods do
+      if let some rootIdx := env.getModuleIdx? m then
+        if includeRoots then
+          allowed := allowed.insert rootIdx
+        if let some md := env.header.moduleData.get? rootIdx.toNat then
+          for imp in md.imports do
+            if let some impIdx := env.getModuleIdx? imp.module then
+              allowed := allowed.insert impIdx
+
+    let mut out : Std.HashMap Name ConstantInfo := {}
+    for (n, ci) in env.constants do
+      if let some owner := env.getModuleIdxFor? n then
+        if allowed.contains owner then
+          out := out.insert n ci
+    pure out
+
 
 /-- Imports the project modules in a single environment and gets all tagged declarations. Requires project to be `lake build`-ed first. -/
-unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) : IO (List FileDescriptor) := do
+unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods : Array Name) (checkAll? : Bool) : IO (List FileDescriptor) := do
   let env ← withTiming timingsRef "descriptor.importDependencies" <| do
     let imports := importMods.map (fun mod => ({ module := mod } : Import))
     importModules imports {} 0
@@ -96,11 +119,19 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     pure <| env.constants.fold (fun acc k ci =>
       if TagAttribute.hasTag targetAttribute env k then ci :: acc else acc
     ) []
+  let tagged_decl_names := tagged_decls.map (fun ci => ci.name) |>.foldl (·.insert ·) Std.HashSet.empty
 
   let (scanCandidates, namesForHumanScan) ← withTiming timingsRef "descriptor.scanDeclarations" <| do
     let mut scanCandidates : Array (Name × ConstantInfo) := #[]
     let mut namesForHumanScan : Array Name := #[]
-    for ci in tagged_decls do
+    let decls_to_scan ← if checkAll?
+      then
+        let temp ← getConstantsInModules env importMods
+        pure <| temp.toList.map (fun (_, ci) => ci)
+      else
+        pure tagged_decls
+    IO.println s!"Scanning {decls_to_scan.length} declarations for targets..."
+    for ci in decls_to_scan do
       if ci.kind ∈ ["theorem", "def"] then
         scanCandidates := scanCandidates.push (ci.name, ci)
         namesForHumanScan := namesForHumanScan.push ci.name
@@ -151,7 +182,7 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
           contents := default,
           context := default,
           axioms := default,
-          target? := true,
+          target? := tagged_decl_names.contains n,
           resolved? := default
         }, mod?, rng)
     pure ret
@@ -180,7 +211,7 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     let axioms := match axiomMap.get? desc.ci.name with
       | some a => a
       | none => collectAxiomsRaw env desc.ci.name
-    validateCollectedAxioms desc.ci.name axioms true
+    validateCollectedAxioms desc.ci.name axioms (tagged_decl_names.contains desc.ci.name)
 
     out := out.push ({
       desc with
@@ -249,7 +280,7 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
 
   try
     let importModsList : List Name ← withTiming timingsRef "cli.resolveImportInput" <| do
-      let importFiles := (args.flag! "importFiles" |>.as! String).trim
+      let importFiles := (args.flag! "import_files" |>.as! String).trim
       if importFiles == "<default>" then
         return (← getDefaultImportsViaLakeExe)
       else
@@ -265,7 +296,10 @@ unsafe def getAllTargetsCLI (args : Cli.Parsed) : IO UInt32 := do
         seenMods := seenMods.insert mod
         importMods := importMods.push mod
 
-    let descriptors ← getAllTargetsInProject timingsRef importMods
+    let checkFiles? := (args.flag! "check_all" |>.as! String).trim.toLower == "true"
+
+
+    let descriptors ← getAllTargetsInProject timingsRef importMods checkFiles?
 
     let json ← withTiming timingsRef "cli.encodeDescriptorJson" <| do
       pure (toJson descriptors).pretty
@@ -288,10 +322,11 @@ unsafe def getAllTargets : Cmd := `[Cli|
   "Get targets from a string."
 
     FLAGS:
-      importFiles : String; "(Comma-seperated list of) file paths/modules for target import files."
+      import_files : String; "(Comma-seperated list of) file paths/modules for target import files. Default: defaultTargets in your lakefile"
+      check_all : Bool; "If true, check all declarations in the imported modules. Default: false."
 
     EXTENSIONS:
-      defaultValues! #[("importFiles", "<default>")]
+      defaultValues! #[("import_files", "<default>"), ("check_all", "false")]
   ]
 
 
