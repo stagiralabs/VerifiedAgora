@@ -29,16 +29,20 @@ def batchHumanDecls
   | some out => pure out
   | none => pure {}
 
-def getConstantsInModule (env : Environment) (mod : Name) : IO (Std.HashMap Name ConstantInfo) := do
-  let modIdx? : Option ModuleIdx := env.getModuleIdx? mod
-  let mut ciMap : Std.HashMap Name ConstantInfo := {}
-  for (n, ci) in env.constants do
-    let ownedByModule := match modIdx?, env.getModuleIdxFor? n with
-      | some modIdx, some declIdx => modIdx == declIdx
-      | _, _ => false
-    if ownedByModule then
-      ciMap := ciMap.insert n ci
-  pure ciMap
+def getConstantsInModule (env : Environment) (mod? : Option Name) : IO (Std.HashMap Name ConstantInfo) := do
+  if let some mod := mod? then
+    let modIdx? : Option ModuleIdx := env.getModuleIdx? mod
+    let mut ciMap : Std.HashMap Name ConstantInfo := {}
+    for (n, ci) in env.constants do
+      let ownedByModule := match modIdx?, env.getModuleIdxFor? n with
+        | some modIdx, some declIdx => modIdx == declIdx
+        | _, _ => false
+      if ownedByModule then
+        ciMap := ciMap.insert n ci
+    pure ciMap
+  else
+    pure <| env.constants.map₂.toList.foldl (fun m (n, ci) => m.insert n ci) {}
+
 
 def getConstantsInModules
     (env : Environment)

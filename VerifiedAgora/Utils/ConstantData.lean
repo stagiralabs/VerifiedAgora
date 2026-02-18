@@ -1,77 +1,23 @@
 import Lean
 
-open Lean
+open Lean Core Elab IO Meta Term Command Tactic Environment
 
 abbrev SerializedExpr := String
-def Lean.Expr.serialize (e : Expr) : SerializedExpr := e.dbgToString
-
-def normalizeHygSegment (s : String) : String :=
-  match s.splitOn "_hyg." with
-  | [] => s
-  | head :: tail =>
-    tail.foldl (fun acc part =>
-      let stripped := String.mk (part.data.dropWhile (fun c => c.isDigit))
-      acc ++ "_hyg.0" ++ stripped
-    ) head
-
-def normalizeNameSegment (modStr : String) (s : String) : String :=
-  normalizeHygSegment (s.replace modStr "<MODULE>")
-
-partial def lastStrComponent? : Name → Option String
-  | .anonymous => none
-  | .str _ s => some s
-  | .num p _ => lastStrComponent? p
-
-partial def normalizeNameForModule (mod : Name) : Name → Name
-  | .anonymous => .anonymous
-  | .str p s =>
-    let p' := normalizeNameForModule mod p
-    .str p' (normalizeNameSegment mod.toString s)
-  | .num p n =>
-    let p' := normalizeNameForModule mod p
-    let n' := match lastStrComponent? p' with
-      | some s => if s == "_hyg" || s.endsWith "_hyg" then 0 else n
-      | none => n
-    .num p' n'
-
-partial def normalizeLevelForModule (mod : Name) : Level → Level
-  | .zero => .zero
-  | .succ l => .succ (normalizeLevelForModule mod l)
-  | .max l₁ l₂ => .max (normalizeLevelForModule mod l₁) (normalizeLevelForModule mod l₂)
-  | .imax l₁ l₂ => .imax (normalizeLevelForModule mod l₁) (normalizeLevelForModule mod l₂)
-  | .param n => .param (normalizeNameForModule mod n)
-  | .mvar n => .mvar n
-
-partial def normalizeExprForModule (mod : Name) : Expr → Expr
-  | .bvar i => .bvar i
-  | .fvar id => .fvar id
-  | .mvar id => .mvar id
-  | .sort l => .sort (normalizeLevelForModule mod l)
-  | .const n ls => .const (normalizeNameForModule mod n) (ls.map (normalizeLevelForModule mod))
-  | .app f a => .app (normalizeExprForModule mod f) (normalizeExprForModule mod a)
-  | .lam _ t b bi => .lam `_ (normalizeExprForModule mod t) (normalizeExprForModule mod b) bi
-  | .forallE _ t b bi => .forallE `_ (normalizeExprForModule mod t) (normalizeExprForModule mod b) bi
-  | .letE _ t v b nonDep =>
-      .letE `_ (normalizeExprForModule mod t) (normalizeExprForModule mod v) (normalizeExprForModule mod b) nonDep
-  | .lit l => .lit l
-  | .mdata _ b => normalizeExprForModule mod b
-  | .proj n i b => .proj (normalizeNameForModule mod n) i (normalizeExprForModule mod b)
-
-def exprKeyForModule (mod : Name) (e : Expr) : UInt64 :=
-  hash (normalizeExprForModule mod e)
-
+def Lean.Expr.serialize (e : Expr) (env : Environment) : IO SerializedExpr := do
+  let ctx := { fileName := "", fileMap := default }
+  let pp ← Prod.fst <$> (CoreM.toIO (MetaM.run' do ppExpr e) ctx {env:=env})
+  pure pp.pretty
 
 
 structure ConstantDataVal where
   name : Name
   levelParams : List Name
   type : SerializedExpr
-  typeKey : UInt64
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 structure AxiomDataVal extends ConstantDataVal where
   isUnsafe : Bool
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 
 instance : ToJson DefinitionSafety where
@@ -89,26 +35,29 @@ instance : FromJson DefinitionSafety where
       | _ => .error "Invalid DefinitionSafety value"
     | _ => .error "Expected string value for DefinitionSafety"
 
+instance : Hashable DefinitionSafety where
+  hash s := match s with
+    | DefinitionSafety.safe => 0
+    | DefinitionSafety.unsafe => 1
+    | DefinitionSafety.partial => 2
+
 structure DefinitionDataVal extends ConstantDataVal where
   value  : SerializedExpr
-  valueKey : UInt64
   safety : DefinitionSafety
   all : List Name := [name]
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 
 structure TheoremDataVal extends ConstantDataVal where
   value : SerializedExpr
-  valueKey : UInt64
   all : List Name := [name]
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 structure OpaqueDataVal extends ConstantDataVal where
   value : SerializedExpr
-  valueKey : UInt64
   isUnsafe : Bool
   all : List Name := [name]
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 
 /-
@@ -144,10 +93,16 @@ instance : BEq QuotKind where
     | (QuotKind.ind, QuotKind.ind) => true
     | _ => false
 
+instance : Hashable QuotKind where
+  hash k := match k with
+    | QuotKind.type => 0
+    | QuotKind.ctor => 1
+    | QuotKind.lift => 2
+    | QuotKind.ind  => 3
 
 structure QuotDataVal extends ConstantDataVal where
   kind : QuotKind
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 structure InductiveDataVal extends ConstantDataVal where
   numParams : Nat
@@ -158,7 +113,7 @@ structure InductiveDataVal extends ConstantDataVal where
   isRec : Bool
   isUnsafe : Bool
   isReflexive : Bool
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 structure ConstructorDataVal extends ConstantDataVal where
   induct  : Name
@@ -166,7 +121,7 @@ structure ConstructorDataVal extends ConstantDataVal where
   numParams : Nat
   numFields : Nat
   isUnsafe : Bool
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 
 /-
@@ -185,7 +140,7 @@ structure SerializedRecursorRule where
   ctor : Name
   nfields : Nat
   rhs : SerializedExpr
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 structure RecursorDataVal extends ConstantDataVal where
   all : List Name
@@ -196,7 +151,7 @@ structure RecursorDataVal extends ConstantDataVal where
   rules : List SerializedRecursorRule
   k : Bool
   isUnsafe : Bool
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 
 inductive ConstantData where
@@ -208,60 +163,51 @@ inductive ConstantData where
   | inductData (ind : InductiveDataVal) : ConstantData
   | ctorData   (ctor : ConstructorDataVal)   : ConstantData
   | recData    (rec : RecursorDataVal)     : ConstantData
-  deriving Inhabited, BEq, ToJson, FromJson
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
 
 namespace ConstantData
-def fromConstantInfo (mod : Name) (ci : ConstantInfo) : ConstantData := match ci with
-  | .axiomInfo ax => ConstantData.axiomData {
+def fromConstantInfo (ci : ConstantInfo) (env : Environment): IO ConstantData := do match ci with
+  | .axiomInfo ax => pure <|  ConstantData.axiomData {
       name := ax.name,
-      levelParams := ax.levelParams.map (normalizeNameForModule mod),
-      type := ax.type.serialize,
-      typeKey := exprKeyForModule mod ax.type,
+      levelParams := ax.levelParams
+      type := ← ax.type.serialize env,
       isUnsafe := ax.isUnsafe
     }
-  | .defnInfo defn => ConstantData.defnData {
+  | .defnInfo defn => pure <| ConstantData.defnData {
       name := defn.name,
-      levelParams := defn.levelParams.map (normalizeNameForModule mod),
-      type := defn.type.serialize,
-      typeKey := exprKeyForModule mod defn.type,
-      value := defn.value.serialize,
-      valueKey := exprKeyForModule mod defn.value,
+      levelParams := defn.levelParams,
+      type := ← defn.type.serialize env,
+      value := ← defn.value.serialize env,
       safety := defn.safety
     }
-  | .thmInfo thm => ConstantData.thmData {
+  | .thmInfo thm => pure <| ConstantData.thmData {
       name := thm.name,
-      levelParams := thm.levelParams.map (normalizeNameForModule mod),
-      type := thm.type.serialize,
-      typeKey := exprKeyForModule mod thm.type,
-      value := thm.value.serialize,
-      valueKey := exprKeyForModule mod thm.value
+      levelParams := thm.levelParams,
+      type := ← thm.type.serialize env,
+      value := ← thm.value.serialize env,
     }
-  | .opaqueInfo op => ConstantData.opaqueData {
+  | .opaqueInfo op => pure <| ConstantData.opaqueData {
       name := op.name,
-      levelParams := op.levelParams.map (normalizeNameForModule mod),
-      type := op.type.serialize,
-      typeKey := exprKeyForModule mod op.type,
-      value := op.value.serialize,
-      valueKey := exprKeyForModule mod op.value,
+      levelParams := op.levelParams,
+      type := ← op.type.serialize env,
+      value := ← op.value.serialize env,
       isUnsafe := op.isUnsafe
     }
-  | .quotInfo quot => ConstantData.quotData {
+  | .quotInfo quot => pure <| ConstantData.quotData {
       name := quot.name,
-      levelParams := quot.levelParams.map (normalizeNameForModule mod),
-      type := quot.type.serialize,
-      typeKey := exprKeyForModule mod quot.type,
+      levelParams := quot.levelParams,
+      type := ← quot.type.serialize env,
       kind := match quot.kind with
         | QuotKind.type => QuotKind.type
         | QuotKind.ctor => QuotKind.ctor
         | QuotKind.lift => QuotKind.lift
         | QuotKind.ind  => QuotKind.ind
     }
-  | .inductInfo ind => ConstantData.inductData {
+  | .inductInfo ind => pure <| ConstantData.inductData {
       name := ind.name,
-      levelParams := ind.levelParams.map (normalizeNameForModule mod),
-      type := ind.type.serialize,
-      typeKey := exprKeyForModule mod ind.type,
+      levelParams := ind.levelParams,
+      type := ← ind.type.serialize env,
       numParams := ind.numParams,
       numIndices := ind.numIndices,
       all := ind.all
@@ -271,31 +217,31 @@ def fromConstantInfo (mod : Name) (ci : ConstantInfo) : ConstantData := match ci
       isUnsafe := ind.isUnsafe,
       isReflexive := ind.isReflexive
     }
-  | .ctorInfo ctor => ConstantData.ctorData {
+  | .ctorInfo ctor => pure <| ConstantData.ctorData {
       name := ctor.name,
-      levelParams := ctor.levelParams.map (normalizeNameForModule mod),
-      type := ctor.type.serialize,
-      typeKey := exprKeyForModule mod ctor.type,
+      levelParams := ctor.levelParams,
+      type := ← ctor.type.serialize env,
       induct  := ctor.induct,
       cidx    := ctor.cidx,
       numParams := ctor.numParams,
       numFields := ctor.numFields,
       isUnsafe := ctor.isUnsafe
     }
-  | .recInfo rec => ConstantData.recData {
+  | .recInfo rec => pure <| ConstantData.recData {
       name := rec.name,
-      levelParams := rec.levelParams.map (normalizeNameForModule mod),
-      type := rec.type.serialize,
-      typeKey := exprKeyForModule mod rec.type,
+      levelParams := rec.levelParams,
+      type := ← rec.type.serialize env,
       all := rec.all,
       numParams := rec.numParams,
       numIndices := rec.numIndices,
       numMotives := rec.numMotives,
       numMinors := rec.numMinors,
-      rules := rec.rules.map (fun r => {
+      rules := ← rec.rules.mapM (fun r => do
+      let rhs ← r.rhs.serialize env
+      pure {
         ctor := r.ctor,
         nfields := r.nfields,
-        rhs := r.rhs.serialize
+        rhs := rhs
       }),
       k := rec.k,
       isUnsafe := rec.isUnsafe
@@ -349,22 +295,12 @@ def numLevelParams (d : ConstantData) : Nat :=
 def type (d : ConstantData) : SerializedExpr :=
   d.toConstantDataVal.type
 
-def typeKey (d : ConstantData) : UInt64 :=
-  d.toConstantDataVal.typeKey
-
 def value? (info : ConstantData) (allowOpaque := false) : Option SerializedExpr :=
   match info with
   | .defnData {value, ..}   => some value
   | .thmData  {value, ..}   => some value
   | .opaqueData {value, ..} => if allowOpaque then some value else none
   | _                       => none
-
-def valueKey? (info : ConstantData) (allowOpaque := false) : Option UInt64 :=
-  match info with
-  | .defnData {valueKey, ..}   => some valueKey
-  | .thmData  {valueKey, ..}   => some valueKey
-  | .opaqueData {valueKey, ..} => if allowOpaque then some valueKey else none
-  | _                          => none
 
 
 end ConstantData

@@ -3,6 +3,7 @@ import VerifiedAgora.Utils.Axioms
 
 open Lean
 
+
 structure CollectedFailure where
   declName : String
   moduleName : String

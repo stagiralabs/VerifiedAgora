@@ -17,7 +17,7 @@ def equivThm (cinfo₁ cinfo₂ : ConstantData) : Bool := Id.run do
   let .thmData tval₁ := cinfo₁ | false
   let .thmData tval₂ := cinfo₂ | false
   return tval₁.name == tval₂.name
-    && tval₁.typeKey == tval₂.typeKey
+    && tval₁.type == tval₂.type
     && tval₁.levelParams == tval₂.levelParams
 
 def equivDefn (ctarget cnew : ConstantData) (checkVal : Bool := false) : Bool := Id.run do
@@ -25,72 +25,78 @@ def equivDefn (ctarget cnew : ConstantData) (checkVal : Bool := false) : Bool :=
   let .defnData tval₂ := cnew | false
 
   return tval₁.name == tval₂.name
-    && tval₁.typeKey == tval₂.typeKey
+    && tval₁.type == tval₂.type
     && tval₁.levelParams == tval₂.levelParams
     && tval₁.all == tval₂.all
     && tval₁.safety == tval₂.safety
-    && (if checkVal then tval₁.valueKey == tval₂.valueKey else true)
+    && (if checkVal then tval₁.value == tval₂.value else true)
 
-def equivThmDataNormalized (a b : ConstantData) (_submissionMod : Name) (_targetMod? : Option Name) : Bool :=
-  equivThm a b
+instance : ToJson DeclarationRange where
+  toJson r := Json.mkObj [
+    ("pos", ToJson.toJson r.pos),
+    ("endPos", ToJson.toJson r.endPos),
+    ("charUtf16", ToJson.toJson r.charUtf16),
+    ("endCharUtf16", ToJson.toJson r.endCharUtf16)
+  ]
+instance : FromJson DeclarationRange where
+  fromJson? j := do
+    let pos ← j.getObjValAs? Position "pos"
+    let endPos ← j.getObjValAs? Position "endPos"
+    let charUtf16 ← j.getObjValAs? Nat "charUtf16"
+    let endCharUtf16 ← j.getObjValAs? Nat "endCharUtf16"
+    return {
+      pos := pos,
+      endPos := endPos,
+      charUtf16 := charUtf16,
+      endCharUtf16 := endCharUtf16
+    }
 
-def equivDefnDataNormalized (a b : ConstantData) (_submissionMod : Name) (_targetMod? : Option Name) (checkVal : Bool := false) : Bool :=
-  equivDefn a b checkVal
+instance : Hashable Position where
+  hash p := hash (p.line, p.column)
+
+instance : Hashable DeclarationRange where
+  hash r := hash (r.pos, r.endPos, r.charUtf16, r.endCharUtf16)
+
+instance : ToJson AttributeKind where
+  toJson k := Json.str <| match k with
+    | AttributeKind.global => "global"
+    | AttributeKind.local => "local"
+    | AttributeKind.scoped => "scoped"
+instance : FromJson AttributeKind where
+  fromJson? j := do
+    let s ← j.getStr?
+    match s with
+    | "global" => Except.ok AttributeKind.global
+    | "local" =>  Except.ok AttributeKind.local
+    | "scoped" => Except.ok AttributeKind.scoped
+    | _ => Except.error "Invalid AttributeKind value"
+
+instance : Hashable AttributeKind where
+  hash k := match k with
+    | AttributeKind.global => 0
+    | AttributeKind.local => 1
+    | AttributeKind.scoped => 2
 
 structure DeclarationDescriptor where
+  name : Name -- Redundant with `ci.<whatever>.name`, but makes some code simpler
   ci : ConstantData
   contents : String
-  context : String
+  range : DeclarationRange
+  -- context : String
   axioms : Array Name
-  target? : Bool
-  resolved? : Bool
-  deriving Inhabited, BEq
+  target : Bool
+  resolved : Bool
+  modified : Bool
+  new : Bool
+  attributes : Array Name
+  isInstance : (Bool × Option Nat × Option AttributeKind)
+  deriving Inhabited, BEq, ToJson, FromJson, Hashable
 
-def DeclarationDescriptor.toJson (desc : DeclarationDescriptor) : Json :=
-  Json.mkObj [
-    ("name", Json.str desc.ci.name.toString),
-    ("kind", Json.str desc.ci.kind),
-    ("contents", Json.str desc.contents),
-    ("target?", Json.bool desc.target?),
-    ("context", Json.str desc.context),
-    ("resolved?", Json.bool desc.resolved?),
-    ("axioms", Json.arr <| desc.axioms.map (fun ax => Json.str ax.toString)),
-    ("ci", ToJson.toJson desc.ci)
-  ]
-
-def DeclarationDescriptor.fromJson (json : Json) : Except String DeclarationDescriptor := do
-  let contents ← json.getObjValAs? String "contents"
-  let context ← json.getObjValAs? String "context"
-  let target? ← json.getObjValAs? Bool "target?"
-  let resolved? ← json.getObjValAs? Bool "resolved?"
-  let axiomsJson ← json.getObjValAs? (Array Json) "axioms"
-  let axioms ← axiomsJson.mapM (fun axJson => do
-    let axStr ← axJson.getStr?
-    return Name.mkSimple axStr
-  )
-
-  let ci ← FromJson.fromJson? (← json.getObjValAs? Json "ci") |>.mapError (fun e => s!"Error parsing 'ci': {e}")
-
-  pure {
-    ci := ci,
-    contents := contents,
-    context := context,
-    target? := target?,
-    resolved? := resolved?,
-    axioms := axioms
-  }
-
-instance : ToJson DeclarationDescriptor where
-  toJson fd := fd.toJson
-
-instance : FromJson DeclarationDescriptor where
-  fromJson? json := DeclarationDescriptor.fromJson json
-
-instance : ToString DeclarationDescriptor where
-  toString fd := ToJson.toJson fd |>.pretty
+instance [BEq α] [Hashable α]: BEq (Std.HashSet α) where
+  beq s1 s2 := s1.all (fun x => s2.contains x) && s2.all (fun x => s1.contains x)
 
 structure FileDescriptor where
-  decls : List DeclarationDescriptor
+  decls : Array DeclarationDescriptor
   path : System.FilePath
   moduleName : Name
   contents : String

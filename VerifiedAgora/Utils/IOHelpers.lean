@@ -18,6 +18,22 @@ def getFileOrModuleContents (name : String) : IO (String × Name × System.FileP
     catch e2 =>
       throw <| IO.userError s!"Could not find module or file: {name}:\n  as module: {e}\n  as file: {e2}"
 
+
+def getFileOrModuleName (name : String) : IO (Name × System.FilePath × Bool) := do
+  let modName := name.toName
+  try
+    let filePath ← Lean.Elab.IO.findLean modName
+    pure (modName, filePath, false)
+  catch e =>
+    try
+      let filePath := System.FilePath.mk name
+      let moduleName ← moduleNameOfFileName (filePath) none
+      let ex ← filePath.pathExists
+      pure (moduleName, filePath, ex)
+    catch e2 =>
+      throw <| IO.userError s!"Could not find module or file: {name}:\n  as module: {e}\n  as file: {e2}"
+
+
 def parseBoolFlag (flagName : String) (raw : String) : IO Bool := do
   match raw.trim.toLower with
   | "true" => pure true
