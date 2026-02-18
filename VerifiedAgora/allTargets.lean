@@ -79,13 +79,19 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
               sourceFileCacheRef.modify (fun m => m.insert declMod fp)
               pure (some declMod)
           | none => pure none
+
         ret := ret.push ({
-          ci := .fromConstantInfo (mod?.getD default) ci,
+          name := n,
+          range := rng.range,
+          modified := false, --meaningless
+          new := false, --meaningless
+          attributes := default, --will fill this in later
+          isInstance := default, --will fill this in later
+          ci := ← (ConstantData.fromConstantInfo ci env),
           contents := default,
-          context := default,
           axioms := default,
-          target? := tagged_decl_names.contains n,
-          resolved? := default
+          target := tagged_decl_names.contains n,
+          resolved := default
         }, mod?, rng)
     pure ret
 
@@ -120,9 +126,8 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     out := out.push ({
       desc with
       contents := Substring.mk source.source (source.ofPosition rng.range.pos) (source.ofPosition rng.range.endPos) |>.toString,
-      context := Substring.mk source.source ⟨0⟩ (source.ofPosition rng.range.pos) |>.toString,
       axioms := axioms,
-      resolved? := axioms.all (fun a => a ∈ AllowedAxioms)
+      resolved := axioms.all (fun a => a ∈ AllowedAxioms)
     }, mod?.getD default)
 
   let out' : Array (DeclarationDescriptor × Name × System.FilePath × String) ← out.mapM (fun (desc, mod) => do
@@ -141,7 +146,7 @@ unsafe def getAllTargetsInProject (timingsRef : IO.Ref TimingState) (importMods 
     let contents := match vals[0]? with
       | some (_, _, _, contents) => contents
       | none => default
-    { decls := decls.toList, path := path, moduleName := mod, contents := contents }
+    { decls := decls, path := path, moduleName := mod, contents := contents }
   )
 
   let failures ← failuresRef.get
