@@ -6,14 +6,14 @@ open Lean Core Elab IO Meta Term Command Tactic Cli Environment CollectAxiomsBat
 
 
 
-def getDeclDescriptors (env : Environment) (timingsRef : IO.Ref TimingState) (source : String) (mod? : Option Name) : IO (Array DeclarationDescriptor) := do
+def getDeclDescriptors (env : Environment) (_ : IO.Ref TimingState) (source : String) (mod? : Option Name) : IO (Array DeclarationDescriptor) := do
 
   let targetSet := targetAttribute.getDecls env
   let ciMap ← getConstantsInModule env mod?
   let humanDeclMap ← batchHumanDecls ciMap.keys.toArray env
   let axiomMap := collectAxiomsBatched env humanDeclMap.keys.toArray
   let fileMap := source.toFileMap
-  let allAttributes := getAttributeNames env
+  let _ := getAttributeNames env
 
 
   let output ← humanDeclMap.toArray.filterMapM (fun (n, rng) => do
@@ -48,31 +48,148 @@ def getDeclDescriptors (env : Environment) (timingsRef : IO.Ref TimingState) (so
 
   return output
 
+structure MergePatch where
+  startPos : String.Pos
+  endPos : String.Pos
+  text : String
+  orderKey : Nat
+  isReplace : Bool
 
-def mergeDescriptors (submissionDescriptor : FileDescriptor) (rbuf : Array (DeclarationDescriptor × Option DeclarationDescriptor × Bool)) : FileDescriptor := Id.run do
-  let mergedDecls := rbuf.map (fun (submDesc, targetDesc?, useSubm?) =>
+def normalizeInsertedDeclContents (contents : String) (prefixNewline : Bool) : String :=
+  let withPrefix := if prefixNewline && !contents.startsWith "\n" then "\n" ++ contents else contents
+  if withPrefix.endsWith "\n" then withPrefix else withPrefix ++ "\n"
+
+def findNearestAnchors
+    (targetDecls : Array DeclarationDescriptor)
+    (submissionDeclMap : Std.HashMap Name DeclarationDescriptor)
+    (targetIdx : Nat)
+    : Option DeclarationDescriptor × Option DeclarationDescriptor := Id.run do
+  let mut prevAnchor? : Option DeclarationDescriptor := none
+  let mut i := targetIdx
+  while i > 0 do
+    let prevIdx := i - 1
+    let prevDecl := targetDecls[prevIdx]!
+    if let some subDecl := submissionDeclMap.get? prevDecl.name then
+      prevAnchor? := some subDecl
+      i := 0
+    else
+      i := prevIdx
+
+  let mut nextAnchor? : Option DeclarationDescriptor := none
+  let mut j := targetIdx + 1
+  while j < targetDecls.size do
+    let nextDecl := targetDecls[j]!
+    if let some subDecl := submissionDeclMap.get? nextDecl.name then
+      nextAnchor? := some subDecl
+      j := targetDecls.size
+    else
+      j := j + 1
+
+  (prevAnchor?, nextAnchor?)
+
+def patchSortLt (p1 p2 : MergePatch) : Bool :=
+  if p1.startPos.byteIdx > p2.startPos.byteIdx then
+    true
+  else if p1.startPos.byteIdx < p2.startPos.byteIdx then
+    false
+  else if p1.isReplace && !p2.isReplace then
+    true
+  else if !p1.isReplace && p2.isReplace then
+    false
+  else
+    p1.orderKey > p2.orderKey
+
+def declRangeLt (d1 d2 : DeclarationDescriptor) : Bool :=
+  if d1.range.pos.line < d2.range.pos.line then
+    true
+  else if d1.range.pos.line > d2.range.pos.line then
+    false
+  else
+    d1.range.pos.column < d2.range.pos.column
+
+
+def mergeDescriptors
+    (submissionDescriptor : FileDescriptor)
+    (targetDescriptor? : Option FileDescriptor)
+    (rbuf : Array (DeclarationDescriptor × Option DeclarationDescriptor × Bool))
+    : FileDescriptor := Id.run do
+  let submissionFileMap := submissionDescriptor.contents.toFileMap
+  let submissionDeclMap := Std.HashMap.ofList <| submissionDescriptor.decls.toList.map (fun d => (d.name, d))
+
+  let baseMergedDecls := rbuf.map (fun (submDesc, targetDesc?, useSubm?) =>
     if let some targetDesc := targetDesc? then
       if useSubm? then submDesc else targetDesc
     else submDesc
   )
-  -- now want to build merged file contents. To do this, we will take the submission file contents as base, and for each decl this does not have useSubm? = true, we will replace the corresponding range in the file with the target decl contents' range. We will do this in descending line number order of the submDesc's start line number. We can be assured that the ranges will not overlap because of how we constructed the descriptors.
-  let sortedRbuf := rbuf.qsort (fun (d1, _, _) (d2, _, _) => d1.range.pos.line > d2.range.pos.line)
+
+  let targetDeclsInFileOrder : Array DeclarationDescriptor := match targetDescriptor? with
+    | none => #[]
+    | some targetDescriptor => targetDescriptor.decls.qsort declRangeLt
+
+  let targetOnlyDecls : Array DeclarationDescriptor :=
+    targetDeclsInFileOrder.filter (fun targetDecl => !submissionDeclMap.contains targetDecl.name)
+
+  let mergedDecls := baseMergedDecls ++ targetOnlyDecls
+
+  -- Build deterministic patches over submission contents.
+  let targetIdxMap : Std.HashMap Name Nat := match targetDescriptor? with
+    | none => {}
+    | some _ =>
+      Id.run do
+        let mut m : Std.HashMap Name Nat := {}
+        let mut i : Nat := 0
+        for d in targetDeclsInFileOrder do
+          m := m.insert d.name i
+          i := i + 1
+        m
+
+  let mut patches : Array MergePatch := #[]
+  for (submDesc, targetDesc?, useSubm?) in rbuf do
+    if !useSubm? then
+      if let some targetDesc := targetDesc? then
+        let startPos := submissionFileMap.ofPosition submDesc.range.pos
+        let endPos := submissionFileMap.ofPosition submDesc.range.endPos
+        let orderKey := (targetIdxMap.get? targetDesc.name).getD 0
+        patches := patches.push {
+          startPos := startPos
+          endPos := endPos
+          text := targetDesc.contents
+          orderKey := orderKey
+          isReplace := true
+        }
+
+  if targetDescriptor?.isSome then
+    for targetIdx in [:targetDeclsInFileOrder.size] do
+      let targetDecl := targetDeclsInFileOrder[targetIdx]!
+      if !submissionDeclMap.contains targetDecl.name then
+        let (prevAnchor?, nextAnchor?) := findNearestAnchors targetDeclsInFileOrder submissionDeclMap targetIdx
+        let (insertPos, prefixNewline) :=
+          if let some nextAnchor := nextAnchor? then
+            (submissionFileMap.ofPosition nextAnchor.range.pos, false)
+          else if let some prevAnchor := prevAnchor? then
+            (submissionFileMap.ofPosition prevAnchor.range.endPos, true)
+          else
+            (submissionDescriptor.contents.endPos, false)
+        let insertText := normalizeInsertedDeclContents targetDecl.contents prefixNewline
+        patches := patches.push {
+          startPos := insertPos
+          endPos := insertPos
+          text := insertText
+          orderKey := targetIdx
+          isReplace := false
+        }
+
+  let sortedPatches := patches.qsort patchSortLt
   let mut finalContents := submissionDescriptor.contents
-  for (submDesc, targetDesc?, useSubm?) in sortedRbuf do
-    -- if useSubm? is true, continue.
-    -- if useSubm? is false and targetDesc? is some, then replace the corresponding range in submissionDescriptor.contents with targetDesc.contents
-    let fileMap := submissionDescriptor.contents.toFileMap
-    if !useSubm? && targetDesc?.isSome then
-      let targetDesc := targetDesc?.get!
-      let range := submDesc.range
-      let before := Substring.mk finalContents 0 (fileMap.ofPosition range.pos) |>.toString
-      let after := Substring.mk finalContents (fileMap.ofPosition range.endPos) finalContents.endPos |>.toString
-      let newContents := before ++ targetDesc.contents ++ after
-      finalContents := newContents
+  for patch in sortedPatches do
+    let before := Substring.mk finalContents 0 patch.startPos |>.toString
+    let after := Substring.mk finalContents patch.endPos finalContents.endPos |>.toString
+    finalContents := before ++ patch.text ++ after
+
   { submissionDescriptor with decls := mergedDecls, contents := finalContents }
 
 
-def validateDescriptor (submissionDescriptor : FileDescriptor) (targetDescriptor? : Option FileDescriptor) (timingsRef : IO.Ref TimingState) : IO (FileDescriptor × Array CollectedFailure) := do
+def validateDescriptor (submissionDescriptor : FileDescriptor) (targetDescriptor? : Option FileDescriptor) (_ : IO.Ref TimingState) : IO (FileDescriptor × Array CollectedFailure) := do
   let failuresRef ← IO.mkRef (#[] : Array CollectedFailure)
   -- check target is a subset of submission
   let submissionSet := Std.HashMap.ofList <| submissionDescriptor.decls.toList.map (fun d => (d.name, d))
@@ -197,7 +314,7 @@ def validateDescriptor (submissionDescriptor : FileDescriptor) (targetDescriptor
       let newDesc := { desc with new := true }
       rbuf := rbuf.push (newDesc, none, true)
     -- select whether or not to take submission or target decl and mark as modified
-  let finalDesc := mergeDescriptors submissionDescriptor rbuf
+  let finalDesc := mergeDescriptors submissionDescriptor targetDescriptor? rbuf
   return (finalDesc, (← failuresRef.get))
 
 
