@@ -65,8 +65,9 @@ mutual
     return res
 end
 
-
-def collectAxiomsBatched (env : Environment) (roots : Array Name) :
+/-- Collect axioms for `roots` with an internal per-node cache shared across all roots.
+    Returns a map from each root to its axiom array. -/
+def collectAxiomsBatchedCore (env : Environment) (roots : Array Name) :
     Std.HashMap Name (Array Name) :=
   let action : M (Std.HashMap Name (Array Name)) := do
     let mut out : Std.HashMap Name (Array Name) := {}
@@ -76,6 +77,11 @@ def collectAxiomsBatched (env : Environment) (roots : Array Name) :
     return out
   ((action.run env).run {}).1
 
-
 end CollectAxiomsBatched
+
+/-- Collect axioms for multiple roots, sharing an internal cache across all of them. -/
+def collectAxiomsBatched (env : Environment) (roots : Array Name) :
+    Std.HashMap Name (Array Name) :=
+  CollectAxiomsBatched.collectAxiomsBatchedCore env roots
+
 end Lean
